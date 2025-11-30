@@ -1,4 +1,3 @@
-// server.js
 const express = require("express");
 const fetch = require("node-fetch");
 const path = require("path");
@@ -66,3 +65,4 @@ app.get("*", (req, res) => {
 app.listen(PORT, () => {
   console.log(`MayorWardProdSports proxy listening on http://localhost:${PORT}`);
 });
+
