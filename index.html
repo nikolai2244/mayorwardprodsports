@@ -854,13 +854,11 @@ function runSimulation(awayTeam, homeTeam) {
 
  () {
  try {
-//  const [espnGames, oddsGames] = await Promise.all([
- // fetchESPNGames(),
- // fetchLiveOdds()
- // ]);
+/const [espnGames, oddsGames] = await Promise.all([
+ fetchESPNGames(),
+ fetchLiveOdds()
+ ]);
 
-      const espnGames = [];
-    const oddsGames = [];
  liveGames = espnGames;
  liveOdds = oddsGames;
  
