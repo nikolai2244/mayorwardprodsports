@@ -750,7 +750,7 @@ function updateScoresStatus(connected) {
 
 async function fetchESPNGames() {
  try {
- const res = await fetch("/api/espn-games");
+ const res = await fetch("/.netlify/functions/espn-games");
  const data = await res.json();
  
  if (data.error || !Array.isArray(data.games)) {
@@ -784,7 +784,7 @@ async function fetchESPNGames() {
 
 async function fetchLiveOdds() {
  try {
- const res = await fetch("/api/odds");
+ const res = await fetch("/.netlify/functions/odds");
  const data = await res.json();
  
  if (data.error || !Array.isArray(data.games)) {
