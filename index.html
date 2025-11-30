@@ -959,6 +959,11 @@ function switchTab(event, tabName) {
   if (tabName === 'simulator') {
     renderSimulatorGames(liveGames);
   }
+    
+   // If mayorspicks tab, render Mayor's Picks
+   if (tabName === 'mayorspicks') {
+      renderMayorsPicks(liveGames, liveOdds);
+   }
 }
 
 // Render games in simulator with simulation buttons
@@ -1030,6 +1035,182 @@ function renderSimulatorGames(games) {
     `;
     container.appendChild(card);
   });
+}
+
+ // Render Mayor's Picks with Best Bets, Parlays, and Upsets
+function renderMayorsPicks(games, odds) {
+   const bestBetsContainer = document.getElementById('best-bets-container');
+   const parlaysContainer = document.getElementById('parlays-container');
+   const upsetsContainer = document.getElementById('upsets-container');
+   
+   if (!bestBetsContainer || !parlaysContainer || !upsetsContainer) return;
+   
+   // Use fallback games if no games provided
+   let gamesToAnalyze = games && games.length > 0 ? games : [
+      { away: 'GB', home: 'DET', date: 'Nov 27', time: '1:00 PM', status: 'Scheduled' },
+      { away: 'KC', home: 'DAL', date: 'Nov 27', time: '4:30 PM', status: 'Scheduled' },
+      { away: 'CIN', home: 'BAL', date: 'Nov 27', time: '8:20 PM', status: 'Scheduled' },
+      { away: 'CHI', home: 'PHI', date: 'Nov 28', time: '3:00 PM', status: 'Scheduled' },
+      { away: 'JAX', home: 'TEN', date: 'Nov 28', time: '5:30 PM', status: 'Scheduled' },
+      { away: 'LV', home: 'LAC', date: 'Nov 28', time: '8:15 PM', status: 'Scheduled' },
+      { away: 'LAR', home: 'CAR', date: 'Nov 30', time: '10:00 AM', status: 'Scheduled' },
+      { away: 'SF', home: 'CLE', date: 'Nov 30', time: '1:00 PM', status: 'Scheduled' },
+      { away: 'HOU', home: 'IND', date: 'Nov 30', time: '1:00 PM', status: 'Scheduled' },
+      { away: 'NO', home: 'MIA', date: 'Nov 30', time: '1:00 PM', status: 'Scheduled' }
+   ];
+   
+   // Calculate win probability for each game
+   const gamesWithProb = gamesToAnalyze.map(game => {
+      const awayStr = teamStrength[game.away] || 1.0;
+      const homeStr = teamStrength[game.home] || 1.0;
+      const homeAdv = 0.05; // 5% home advantage
+      
+      const homeWinProb = (homeStr + homeAdv) / (awayStr + homeStr + homeAdv);
+      const awayWinProb = 1 - homeWinProb;
+      
+      return {
+         ...game,
+         homeWinProb: homeWinProb,
+         awayWinProb: awayWinProb,
+         favorite: homeWinProb > awayWinProb ? game.home : game.away,
+         underdog: homeWinProb > awayWinProb ? game.away : game.home,
+         favProb: Math.max(homeWinProb, awayWinProb),
+         underdogProb: Math.min(homeWinProb, awayWinProb)
+      };
+   });
+   
+   // TOP 10 BEST BETS - Sort by highest win probability but exclude heavy favorites
+   const bestBets = gamesWithProb
+      .filter(g => g.favProb < 0.85) // Exclude heavy favorites
+      .sort((a, b) => b.favProb - a.favProb)
+      .slice(0, 10);
+   
+   bestBetsContainer.innerHTML = '';
+   bestBets.forEach((game, idx) => {
+      const pickTeam = game.favorite;
+      const pickProb = (game.favProb * 100).toFixed(1);
+      const teamInfo = teams[pickTeam];
+      
+      if (!teamInfo) return;
+      
+      const card = document.createElement('div');
+      card.className = 'matchup-card';
+      card.innerHTML = `
+         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
+            <div style="display: flex; align-items: center; gap: 15px;">
+               <div style="font-family: 'Permanent Marker', cursive; font-size: 2em; color: var(--accent-warning);">#${idx + 1}</div>
+               <div class="team-logo">
+                  <img src="${teamInfo.logo}" alt="${teamInfo.name}">
+               </div>
+               <div>
+                  <div class="team-name" style="font-size: 1.2em;">${teamInfo.name}</div>
+                  <div style="color: var(--text-muted); font-size: 0.9em;">${game.away} @ ${game.home}</div>
+               </div>
+            </div>
+            <div style="text-align: right;">
+               <div style="font-size: 2em; font-weight: 900; color: var(--accent-success);">${pickProb}%</div>
+               <div style="font-size: 0.9em; color: var(--text-secondary);">Win Probability</div>
+            </div>
+         </div>
+         <div style="color: var(--text-secondary); font-size: 0.9em;">${game.date} at ${game.time}</div>
+      `;
+      bestBetsContainer.appendChild(card);
+   });
+   
+   // 3-LEG PARLAYS - Generate 5 best parlay combinations
+   const parlayPicks = bestBets.slice(0, 6); // Use top 6 for parlays
+   const parlays = [];
+   
+   // Generate different 3-leg combinations
+   for (let i = 0; i < parlayPicks.length - 2; i++) {
+      const parlay = [
+         { team: parlayPicks[i].favorite, prob: parlayPicks[i].favProb, game: parlayPicks[i] },
+         { team: parlayPicks[i+1].favorite, prob: parlayPicks[i+1].favProb, game: parlayPicks[i+1] },
+         { team: parlayPicks[i+2].favorite, prob: parlayPicks[i+2].favProb, game: parlayPicks[i+2] }
+      ];
+      const combinedProb = parlay[0].prob * parlay[1].prob * parlay[2].prob;
+      parlays.push({ legs: parlay, probability: combinedProb });
+   }
+   
+   parlays.sort((a, b) => b.probability - a.probability);
+   
+   parlaysContainer.innerHTML = '';
+   parlays.slice(0, 3).forEach((parlay, idx) => {
+      const parlayProb = (parlay.probability * 100).toFixed(1);
+      const card = document.createElement('div');
+      card.style.cssText = 'background: linear-gradient(135deg, rgba(220, 20, 60, 0.15), rgba(0, 31, 63, 0.15)); border: 2px solid rgba(220, 20, 60, 0.4); border-radius: 15px; padding: 25px;';
+      
+      let legsHTML = parlay.legs.map((leg, legIdx) => {
+         const teamInfo = teams[leg.team];
+         const legProb = (leg.prob * 100).toFixed(1);
+         return `
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 10px; margin-bottom: ${legIdx < 2 ? '10px' : '0'};">
+               <div style="display: flex; align-items: center; gap: 15px;">
+                  <div class="team-logo" style="width: 50px; height: 50px;">
+                     <img src="${teamInfo.logo}" alt="${teamInfo.name}" style="width: 100%; height: 100%; object-fit: contain;">
+                  </div>
+                  <div>
+                     <div style="font-weight: 700; font-size: 1.1em;">${teamInfo.name}</div>
+                     <div style="color: var(--text-muted); font-size: 0.85em;">${leg.game.away} @ ${leg.game.home}</div>
+                  </div>
+               </div>
+               <div style="font-size: 1.3em; font-weight: 900; color: var(--accent-success);">${legProb}%</div>
+            </div>
+         `;
+      }).join('');
+      
+      card.innerHTML = `
+         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h4 style="font-family: 'Permanent Marker', cursive; color: var(--accent-primary); font-size: 1.5em; margin: 0;">Parlay #${idx + 1}</h4>
+            <div style="text-align: right;">
+               <div style="font-size: 1.8em; font-weight: 900; color: var(--accent-warning);">${parlayProb}%</div>
+               <div style="font-size: 0.85em; color: var(--text-secondary);">Combined Probability</div>
+            </div>
+         </div>
+         ${legsHTML}
+      `;
+      parlaysContainer.appendChild(card);
+   });
+   
+   // TOP 2 UPSETS - Underdogs with best chance
+   const upsets = gamesWithProb
+      .filter(g => g.underdogProb > 0.30) // At least 30% chance
+      .sort((a, b) => b.underdogProb - a.underdogProb)
+      .slice(0, 2);
+   
+   upsetsContainer.innerHTML = '';
+   upsets.forEach((game, idx) => {
+      const pickTeam = game.underdog;
+      const pickProb = (game.underdogProb * 100).toFixed(1);
+      const teamInfo = teams[pickTeam];
+      
+      if (!teamInfo) return;
+      
+      const card = document.createElement('div');
+      card.className = 'matchup-card';
+      card.style.border = '2px solid var(--accent-warning)';
+      card.innerHTML = `
+         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
+            <div style="display: flex; align-items: center; gap: 15px;">
+               <div style="font-family: 'Permanent Marker', cursive; font-size: 2.5em; color: var(--accent-warning);">🔥</div>
+               <div class="team-logo">
+                  <img src="${teamInfo.logo}" alt="${teamInfo.name}">
+               </div>
+               <div>
+                  <div class="team-name" style="font-size: 1.3em;">${teamInfo.name}</div>
+                  <div style="color: var(--accent-warning); font-size: 0.95em; font-weight: 700;">UNDERDOG SPECIAL</div>
+                  <div style="color: var(--text-muted); font-size: 0.9em;">${game.away} @ ${game.home}</div>
+               </div>
+            </div>
+            <div style="text-align: right;">
+               <div style="font-size: 2.2em; font-weight: 900; color: var(--accent-warning);">${pickProb}%</div>
+               <div style="font-size: 0.9em; color: var(--text-secondary);">Upset Probability</div>
+            </div>
+         </div>
+         <div style="color: var(--text-secondary); font-size: 0.9em;">${game.date} at ${game.time}</div>
+      `;
+      upsetsContainer.appendChild(card);
+   });
 }
 
 </script>
