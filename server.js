@@ -1,18 +1,3 @@
-const express = require("express");
-const fetch = require("node-fetch");
-const path = require("path");
-
-const app = express();
-
-const PORT = process.env.PORT || 3000;
-const ODDS_API_KEY = process.env.ODDS_API_KEY || "35ea2bfd08888692d90a60bb91273c16";
-
-app.use(express.static(path.join(__dirname)));
-
-app.get("/api/status", (req, res) => {
-  res.json({ ok: true, message: "MayorWardProdSports proxy running" });
-});
-
 app.get("/api/odds", async (req, res) => {
   try {
     const url =
@@ -28,7 +13,6 @@ app.get("/api/odds", async (req, res) => {
     const json = await apiRes.json();
 
     if (!apiRes.ok) {
-      console.error("The Odds API error:", apiRes.status, json);
       return res.status(apiRes.status).json({
         error: true,
         status: apiRes.status,
@@ -36,33 +20,12 @@ app.get("/api/odds", async (req, res) => {
       });
     }
 
-    res.json({ error: false, games: json });
+    return res.json({ error: false, games: json });
   } catch (err) {
-    console.error("Proxy /api/odds error:", err);
-    res.status(500).json({
+    return res.status(500).json({
       error: true,
       status: 500,
       message: "Internal server error fetching odds"
     });
   }
 });
-
-app.get("/api/weather", async (req, res) => {
-  const city = req.query.city || "Detroit";
-  res.json({
-    error: false,
-    city,
-    tempF: 72,
-    conditions: "Partly Cloudy",
-    windMph: 8
-  });
-});
-
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "index.html"));
-});
-
-app.listen(PORT, () => {
-  console.log(`MayorWardProdSports proxy listening on http://localhost:${PORT}`);
-});
-
