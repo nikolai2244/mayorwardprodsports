@@ -1,22 +1,19 @@
-// server.js
 const express = require("express");
 const fetch = require("node-fetch");
 const path = require("path");
 
 const app = express();
 
-const PORT = process.env.PORT || 10000; // Render listens on this port internally
+const PORT = process.env.PORT || 10000;
 const ODDS_API_KEY = process.env.ODDS_API_KEY || "35ea2bfd08888692d90a60bb91273c16";
 
-// Serve static files (index.html, etc.) from the root directory
 app.use(express.static(path.join(__dirname)));
 
-// Simple health check
 app.get("/api/status", (req, res) => {
   res.json({ ok: true, message: "MayorWardProdSports proxy running" });
 });
 
-// Live odds proxy route
+// Live odds from The Odds API
 app.get("/api/odds", async (req, res) => {
   try {
     const url =
@@ -51,6 +48,33 @@ app.get("/api/odds", async (req, res) => {
   }
 });
 
+// Live game data from ESPN
+app.get("/api/espn-games", async (req, res) => {
+  try {
+    const url = "https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard";
+    const apiRes = await fetch(url);
+    const json = await apiRes.json();
+
+    if (!apiRes.ok) {
+      console.error("ESPN API error:", apiRes.status);
+      return res.status(apiRes.status).json({
+        error: true,
+        status: apiRes.status,
+        message: "ESPN API request failed"
+      });
+    }
+
+    return res.json({ error: false, games: json.events || [] });
+  } catch (err) {
+    console.error("Proxy /api/espn-games error:", err);
+    return res.status(500).json({
+      error: true,
+      status: 500,
+      message: "Internal server error fetching ESPN games"
+    });
+  }
+});
+
 // Fallback weather example (optional)
 app.get("/api/weather", async (req, res) => {
   const city = req.query.city || "Detroit";
@@ -72,4 +96,3 @@ app.get("*", (req, res) => {
 app.listen(PORT, () => {
   console.log(`MayorWardProdSports proxy listening on http://localhost:${PORT}`);
 });
-
