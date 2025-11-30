@@ -1,13 +1,13 @@
 version: 1
 
-backend:
+frontend:
   phases:
-    install:
+    preBuild:
       commands:
         - npm ci
     build:
       commands:
-        - echo "Build complete"
+        - echo "Frontend build complete"
   artifacts:
     baseDirectory: /
     files:
