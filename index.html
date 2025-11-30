@@ -664,10 +664,6 @@ function renderGames(games) {
  ${spread !== 'N/A' ? `<div class="spread-badge">Spread: ${spread > 0 ? '+' : ''}${spread}</div>` : ''}
  </div>
  </div>
- <button class="simulate-btn" onclick="runSimulation('${game.away}', '${game.home}')">
- <i class="fas fa-play"></i> RUN SIMULATION
- </button>
- <div id="result-${game.away}-${game.home}" style="margin-top:15px;"></div>
  `;
  container.appendChild(card);
  });
@@ -761,4 +757,5 @@ document.addEventListener("DOMContentLoaded", initializeApp);
 
 </body>
 </html>
+
 
