@@ -2,122 +2,195 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>MayorWard ProdSports – Live NFL Dashboard</title>
+<title>MayorWard ProdSports – Cyberwave Simulator</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- Tech Fonts -->
+<!-- FONTS -->
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
 
 <style>
 
-/* ============================== */
-/*         GLOBAL THEME          */
-/* ============================== */
+/* ============================================================
+   GLOBAL COLOR SYSTEM MATCHING YOUR LOGO
+   ============================================================ */
 
 :root {
-  --bg-dark: #0a0a0a;
-  --bg-card: #121212;
-  --bg-elevated: #1a1a1a;
-  --accent: #FF0033;
-  --accent-glow: rgba(255,0,51,0.5);
-  --tech-cyan: #00Eaff;
-  --text-light: #e5e5e5;
+  --mw-red: #ff003c;
+  --mw-purple: #a400ff;
+  --mw-blue: #001bff;
+  --mw-dark: #050505;
+
+  --text-light: #f2f2f2;
   --text-dim: #999;
+
+  --glass-bg: rgba(15,15,25,0.6);
+  --glass-border: rgba(255,255,255,0.08);
+
+  --cyber-glow: 0 0 18px rgba(255,0,80,0.75),
+                0 0 26px rgba(164,0,255,0.6),
+                0 0 40px rgba(0,27,255,0.3);
 }
+
+/* ============================================================
+   BACKGROUND — RED / PURPLE / BLACK AMBIENT FOG
+   ============================================================ */
 
 body {
   margin: 0;
-  background: var(--bg-dark);
-  color: var(--text-light);
+  background: radial-gradient(circle at 20% 20%, rgba(255,0,65,0.15), transparent 40%),
+              radial-gradient(circle at 80% 30%, rgba(164,0,255,0.15), transparent 45%),
+              radial-gradient(circle at 50% 80%, rgba(0,0,0,0.8), #050505 90%);
+  background-attachment: fixed;
   font-family: 'Roboto', sans-serif;
+  color: var(--text-light);
 }
 
-/* ============================== */
-/*           HEADER               */
-/* ============================== */
+/* Animated fog overlay */
+body::before {
+  content: "";
+  position: fixed;
+  z-index: -1;
+  inset: 0;
+  background: url('https://i.imgur.com/8Qj5dRZ.png'); /* subtle fog */
+  opacity: 0.25;
+  animation: fogMove 25s linear infinite;
+}
+
+@keyframes fogMove {
+  0% { transform: translate(0,0); }
+  50% { transform: translate(-8%, 4%); }
+  100% { transform: translate(0,0); }
+}
+
+/* ============================================================
+   HEADER
+   ============================================================ */
 
 header {
-  padding: 25px 0;
   text-align: center;
-  background: linear-gradient(180deg, #111, #000);
-  border-bottom: 2px solid var(--accent);
+  padding: 35px 0 20px;
+}
+
+header img {
+  width: 220px;
+  filter: drop-shadow(0 0 18px rgba(255,0,80,0.85));
+}
+
+/* ============================================================
+   TAB NAVIGATION
+   ============================================================ */
+
+.tabs {
+  display: flex;
+  justify-content: center;
+  gap: 18px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+.tab-btn {
+  padding: 14px 28px;
+  border-radius: 10px;
   font-family: 'Orbitron', sans-serif;
-  font-size: 2.2rem;
-  letter-spacing: 2px;
-  color: var(--accent);
-  text-shadow: 0 0 15px var(--accent-glow);
+  background: linear-gradient(90deg, var(--mw-red), var(--mw-purple));
+  color: white;
+  cursor: pointer;
+  border: none;
+  font-size: 1rem;
+  letter-spacing: 1px;
+  transition: 0.25s;
+  box-shadow: 0 0 18px rgba(255,0,65,0.4);
 }
 
-/* ============================== */
-/*           LAYOUT               */
-/* ============================== */
-
-.container {
-  max-width: 1400px;
-  margin: auto;
-  padding: 20px;
+.tab-btn.active {
+  transform: translateY(-4px);
+  box-shadow: var(--cyber-glow);
 }
 
-.section {
-  margin-bottom: 40px;
+.tab-content {
+  display: none;
+  margin-top: 40px;
 }
 
-.section-title {
-  font-size: 1.6rem;
-  font-family: 'Orbitron', sans-serif;
-  margin-bottom: 15px;
-  color: var(--tech-cyan);
-  border-left: 4px solid var(--accent);
-  padding-left: 10px;
+.tab-content.active {
+  display: block;
 }
 
-/* ============================== */
-/*             CARDS              */
-/* ============================== */
+/* ============================================================
+   GLASS CARD SYSTEM
+   ============================================================ */
 
 .card-grid {
   display: grid;
-  gap: 20px;
-  grid-template-columns: repeat(auto-fit,minmax(280px,1fr));
+  gap: 25px;
+  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
 }
 
 .card {
-  background: var(--bg-card);
-  border: 1px solid #222;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(12px);
   padding: 20px;
-  border-radius: 14px;
-  transition: .25s;
+  border-radius: 16px;
+  box-shadow: 0 0 22px rgba(255,0,120,0.12);
+  transition: 0.25s;
 }
 
 .card:hover {
   transform: translateY(-6px);
-  box-shadow: 0 0 20px var(--accent-glow);
+  box-shadow: var(--cyber-glow);
 }
 
-.team-title {
-  font-weight: 700;
+.card-title {
+  font-family: 'Orbitron', sans-serif;
   font-size: 1.3rem;
-  margin-bottom: 6px;
+  margin-bottom: 10px;
+  color: var(--mw-purple);
 }
 
-.score, .odds, .weather {
-  margin-top: 6px;
+/* ============================================================
+   SIMULATION BUTTON
+   ============================================================ */
+
+.sim-btn {
+  margin-top: 15px;
+  width: 100%;
+  padding: 14px;
+  font-size: 1.1rem;
+  font-family: 'Orbitron', sans-serif;
+  background: linear-gradient(90deg, var(--mw-purple), var(--mw-red));
+  border: none;
+  border-radius: 10px;
+  color: white;
+  cursor: pointer;
+  box-shadow: var(--cyber-glow);
+  transition: 0.25s;
+}
+
+.sim-btn:hover {
+  transform: translateY(-3px);
+}
+
+/* ============================================================
+   SIMULATION RESULT
+   ============================================================ */
+
+.sim-output {
+  margin-top: 20px;
+  padding: 18px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: var(--text-light);
   font-size: 1rem;
 }
 
-.status {
-  margin-top: 8px;
-  font-style: italic;
-  color: var(--text-dim);
-}
+/* ============================================================
+   STATUS LABELS
+   ============================================================ */
 
-/* ============================== */
-/*         STATUS LABELS          */
-/* ============================== */
-
-.status-line {
+.status-text {
   font-size: 0.9rem;
-  margin-bottom: 5px;
   color: var(--text-dim);
 }
 
@@ -126,80 +199,95 @@ header {
   color: var(--text-dim);
 }
 
-/* ============================== */
-/*       REFRESH INDICATOR        */
-/* ============================== */
-
-.refresh-note {
-  text-align: center;
-  font-size: 0.85rem;
-  color: var(--text-dim);
-  margin-top: 20px;
-  font-style: italic;
-}
-
+/* END CSS */
 </style>
 </head>
 <body>
 
-<header>MAYORWARD PRODSPRTS</header>
+<!-- ============================================================
+     HEADER LOGO (Option C)
+     ============================================================ -->
 
-<div class="container">
+<header>
+  <img src="mw_logo_clean.png" alt="MW Logo">
+</header>
 
-  <!-- LIVE SCORES -->
-  <div class="section">
-    <div class="section-title">LIVE NFL SCORES</div>
-    <div id="scoresStatus" class="status-line">Loading scores…</div>
-    <div id="scoresTimestamp" class="timestamp"></div>
-    <div id="scoresContainer" class="card-grid"></div>
-  </div>
+<!-- ============================================================
+     TABS
+     ============================================================ -->
 
-  <!-- LIVE ODDS -->
-  <div class="section">
-    <div class="section-title">LIVE ODDS</div>
-    <div id="oddsStatus" class="status-line">Loading odds…</div>
-    <div id="oddsTimestamp" class="timestamp"></div>
-    <div id="oddsContainer" class="card-grid"></div>
-  </div>
-
-  <!-- WEATHER (Optional) -->
-  <div class="section">
-    <div class="section-title">WEATHER SNAPSHOT</div>
-    <div id="weatherStatus" class="status-line">Waiting for weather…</div>
-    <div id="weatherContainer" class="card-grid"></div>
-  </div>
-
-  <div class="refresh-note">Auto-refresh interval: every 1 hour</div>
-
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('live')">LIVE MATCHUPS</button>
+  <button class="tab-btn" onclick="switchTab('sim')">GAME SIMULATOR</button>
+  <button class="tab-btn" onclick="switchTab('picks')">MAYOR'S PICKS</button>
+  <button class="tab-btn" onclick="switchTab('weather')">WEATHER</button>
 </div>
 
-<!-- ============================== -->
-<!--      MAIN JAVASCRIPT          -->
-<!-- ============================== -->
+<!-- ============================================================
+     TAB CONTENT
+     ============================================================ -->
+
+<!-- LIVE MATCHUPS -->
+<div id="tab-live" class="tab-content active">
+  <div id="scoresStatus" class="status-text">Loading scores…</div>
+  <div id="scoresTimestamp" class="timestamp"></div>
+  <div id="matchups" class="card-grid"></div>
+</div>
+
+<!-- SIMULATOR -->
+<div id="tab-sim" class="tab-content">
+  <div id="simContainer" class="card-grid"></div>
+</div>
+
+<!-- PICKS -->
+<div id="tab-picks" class="tab-content">
+  <div id="picksContainer" class="card-grid"></div>
+</div>
+
+<!-- WEATHER -->
+<div id="tab-weather" class="tab-content">
+  <div id="weatherStatus" class="status-text">Loading weather…</div>
+  <div id="weatherContainer" class="card-grid"></div>
+</div>
+
+<!-- ============================================================
+     JAVASCRIPT ENGINE — LIVE DATA + SIMULATOR
+     ============================================================ -->
 
 <script>
 
-/* ========================================================= */
-/*                    FETCH: LIVE SCORES                     */
-/* ========================================================= */
+/* ============================================================
+   TAB SWITCHING
+   ============================================================ */
+
+function switchTab(name) {
+  document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+
+  document.getElementById(`tab-${name}`).classList.add('active');
+  event.target.classList.add('active');
+
+  if (name === "sim") renderSimulator();
+}
+
+/* ============================================================
+   FETCH LIVE DATA
+   ============================================================ */
 
 async function fetchScores() {
-  const statusEl = document.getElementById("scoresStatus");
-  const container = document.getElementById("scoresContainer");
-  const timestampEl = document.getElementById("scoresTimestamp");
-
   try {
-    statusEl.textContent = "Loading scores…";
-
     const res = await fetch("/api/espn-games");
     const data = await res.json();
 
-    if (data.error) {
-      statusEl.textContent = "Error fetching scores.";
-      return;
-    }
+    const container = document.getElementById("matchups");
+    const status = document.getElementById("scoresStatus");
+    const timestamp = document.getElementById("scoresTimestamp");
+
+    if (!data.games) return;
 
     container.innerHTML = "";
+    status.textContent = "";
+    timestamp.textContent = "Updated: " + new Date().toLocaleTimeString();
 
     data.games.forEach(game => {
       const comp = game.competitions?.[0];
@@ -208,130 +296,191 @@ async function fetchScores() {
       const home = comp.competitors.find(c => c.homeAway === "home");
       const away = comp.competitors.find(c => c.homeAway === "away");
 
-      const div = document.createElement("div");
-      div.className = "card";
-      div.innerHTML = `
-        <div class="team-title">${away.team.displayName} @ ${home.team.displayName}</div>
-        <div class="score"><strong>Score:</strong> ${away.score} - ${home.score}</div>
-        <div class="status">${game.status.type.shortDetail}</div>
+      const card = document.createElement("div");
+      card.className = "card";
+
+      card.innerHTML = `
+        <div class="card-title">${away.team.displayName} @ ${home.team.displayName}</div>
+        <div><strong>Score:</strong> ${away.score} - ${home.score}</div>
+        <div class="status-text">${game.status.type.shortDetail}</div>
       `;
-      container.appendChild(div);
+
+      container.appendChild(card);
     });
 
-    statusEl.textContent = "";
-    timestampEl.textContent = "Updated: " + new Date().toLocaleString();
-
-  } catch (err) {
-    statusEl.textContent = "Error connecting to scores.";
+  } catch (e) {
+    document.getElementById("scoresStatus").textContent = "Error loading scores";
   }
 }
 
-/* ========================================================= */
-/*                    FETCH: LIVE ODDS                       */
-/* ========================================================= */
+/* ============================================================
+   FETCH ODDS
+   ============================================================ */
+
+let liveOdds = [];
 
 async function fetchOdds() {
-  const statusEl = document.getElementById("oddsStatus");
-  const container = document.getElementById("oddsContainer");
-  const timestampEl = document.getElementById("oddsTimestamp");
-
   try {
-    statusEl.textContent = "Loading odds…";
-
     const res = await fetch("/api/odds");
     const data = await res.json();
-
-    if (data.error) {
-      statusEl.textContent = "Error loading odds.";
-      return;
-    }
-
-    container.innerHTML = "";
-
-    data.games.forEach(game => {
-      const bookmaker = game.bookmakers?.[0];
-      const markets = bookmaker?.markets || [];
-      
-      let formatted = markets
-        .map(m => m.outcomes.map(o => `${o.name}: ${o.price}`).join(" | "))
-        .join("<br>");
-
-      if (!formatted) formatted = "Odds unavailable";
-
-      const div = document.createElement("div");
-      div.className = "card";
-
-      div.innerHTML = `
-        <div class="team-title">${game.away_team} @ ${game.home_team}</div>
-        <div class="odds"><strong>Odds:</strong><br>${formatted}</div>
-      `;
-
-      container.appendChild(div);
-    });
-
-    statusEl.textContent = "";
-    timestampEl.textContent = "Updated: " + new Date().toLocaleString();
-
-  } catch (err) {
-    statusEl.textContent = "Error connecting to odds.";
-  }
+    liveOdds = data.games || [];
+  } catch (e) { }
 }
 
-/* ========================================================= */
-/*                     FETCH: WEATHER                        */
-/* ========================================================= */
+/* ============================================================
+   FETCH WEATHER
+   ============================================================ */
 
 async function fetchWeather() {
-  const statusEl = document.getElementById("weatherStatus");
   const container = document.getElementById("weatherContainer");
-
   try {
-    statusEl.textContent = "Loading weather…";
-
-    // Detroit example (you can change to dynamic later)
-    const res = await fetch("/api/weather?lat=42.3314&lon=-83.0458");
-    const data = await res.json();
-
+    const r = await fetch("/api/weather?lat=42.3314&lon=-83.0458");
+    const data = await r.json();
     container.innerHTML = "";
 
-    if (!data.weather) {
-      statusEl.textContent = "Weather unavailable";
-      return;
-    }
-
-    const w = data.weather.current;
-
-    const div = document.createElement("div");
-    div.className = "card";
-    div.innerHTML = `
-      <div class="team-title">Detroit</div>
-      <div class="weather"><strong>Temp:</strong> ${w.temperature_2m}°C</div>
-      <div class="weather"><strong>Wind:</strong> ${w.wind_speed_10m} m/s</div>
-      <div class="weather"><strong>Precip:</strong> ${w.precipitation} mm</div>
+    const c = data.weather.current;
+    container.innerHTML = `
+      <div class="card">
+        <div class="card-title">Detroit Weather</div>
+        <div>Temp: ${c.temperature_2m}°C</div>
+        <div>Wind: ${c.wind_speed_10m} m/s</div>
+        <div>Precip: ${c.precipitation} mm</div>
+      </div>
     `;
-    container.appendChild(div);
-
-    statusEl.textContent = "";
-
-  } catch (err) {
-    statusEl.textContent = "Weather service error";
+  } catch (e) {
+    document.getElementById("weatherStatus").textContent = "Weather unavailable";
   }
 }
 
-/* ========================================================= */
-/*                    AUTO REFRESH CONTROL                   */
-/* ========================================================= */
+/* ============================================================
+   BUILD SIMULATOR UI
+   ============================================================ */
 
-fetchScores();
-fetchOdds();
-fetchWeather();
+function renderSimulator() {
+  const container = document.getElementById("simContainer");
+  container.innerHTML = "";
 
-// Refresh every **1 hour**
-setInterval(fetchScores, 3600000);
-setInterval(fetchOdds, 3600000);
-setInterval(fetchWeather, 3600000);
+  window.liveGames.forEach(game => {
+    const comp = game.competitions?.[0];
+    if (!comp) return;
+
+    const home = comp.competitors.find(c => c.homeAway === "home");
+    const away = comp.competitors.find(c => c.homeAway === "away");
+
+    const card = document.createElement("div");
+    card.className = "card";
+
+    card.innerHTML = `
+      <div class="card-title">${away.team.abbreviation} @ ${home.team.abbreviation}</div>
+      <button class="sim-btn" onclick="runSim('${away.team.abbreviation}','${home.team.abbreviation}', this)">
+        RUN ADVANCED SIMULATION
+      </button>
+      <div class="sim-output" id="sim-${away.team.abbreviation}-${home.team.abbreviation}"></div>
+    `;
+
+    container.appendChild(card);
+  });
+}
+
+/* ============================================================
+   ADVANCED TRIPLE-PASS MONTE-CARLO ENGINE
+   ============================================================ */
+
+function computeStrength(team) {
+  return {
+    KC:1.35, GB:1.28, DET:1.30, DAL:1.22, CIN:1.18,
+    BAL:1.25, PHI:1.32, SF:1.31, BUF:1.26, LAR:1.12,
+    LAC:1.15, MIN:1.14, TB:1.08, HOU:1.16, IND:0.95,
+    TEN:0.98, NE:0.85, NYJ:0.92, CHI:0.88, CAR:0.82,
+    NO:0.89, MIA:1.10, ARI:0.97, CLE:1.06, PIT:1.04,
+    SEA:1.11, NYG:0.91, JAX:0.87, ATL:0.90, LV:0.86
+  }[team] || 1.0;
+}
+
+function singleSim(away, home) {
+  const a = computeStrength(away);
+  const h = computeStrength(home);
+
+  const base = 21;
+  const homeAdv = 2.5;
+
+  const homeScore = Math.round(base + (h * 7) + (Math.random()*14 - 7) + homeAdv);
+  const awayScore = Math.round(base + (a * 7) + (Math.random()*14 - 7));
+
+  return {homeScore, awayScore};
+}
+
+function runPass(away, home, runs) {
+  let homeWins=0, awayWins=0, homeTotal=0, awayTotal=0;
+
+  for (let i=0;i<runs;i++) {
+    const r = singleSim(away, home);
+    homeTotal += r.homeScore;
+    awayTotal += r.awayScore;
+    if (r.homeScore > r.awayScore) homeWins++;
+    else awayWins++;
+  }
+
+  return {
+    homeWinPct: homeWins / runs,
+    awayWinPct: awayWins / runs,
+    homeAvg: homeTotal / runs,
+    awayAvg: awayTotal / runs
+  };
+}
+
+function runSim(away, home, btn) {
+  const out = document.getElementById(`sim-${away}-${home}`);
+  out.innerHTML = "<em>Running simulation… this may take a moment…</em>";
+
+  setTimeout(() => {
+    const pass1 = runPass(away, home, 15000);
+    const pass2 = runPass(away, home, 1000);
+    const pass3 = runPass(away, home, 500);
+
+    // Combine weighted
+    const homeWin = (pass1.homeWinPct*0.6) + (pass2.homeWinPct*0.25) + (pass3.homeWinPct*0.15);
+    const awayWin = 1 - homeWin;
+
+    const homeScore = (pass1.homeAvg*0.5) + (pass2.homeAvg*0.3) + (pass3.homeAvg*0.2);
+    const awayScore = (pass1.awayAvg*0.5) + (pass2.awayAvg*0.3) + (pass3.awayAvg*0.2);
+
+    out.innerHTML = `
+      <strong>RESULTS:</strong><br><br>
+      ${away} Avg Score: ${awayScore.toFixed(1)}<br>
+      ${home} Avg Score: ${homeScore.toFixed(1)}<br><br>
+      <strong>WIN PROBABILITY:</strong><br>
+      ${away}: ${(awayWin*100).toFixed(1)}%<br>
+      ${home}: ${(homeWin*100).toFixed(1)}%<br><br>
+      <strong>Projected Winner:</strong><br>
+      ${
+        homeWin > awayWin
+        ? `<span style="color:var(--mw-purple)">${home}</span>`
+        : `<span style="color:var(--mw-red)">${away}</span>`
+      }
+    `;
+  }, 50);
+}
+
+/* ============================================================
+   INITIAL LOAD + 1-HOUR REFRESH
+   ============================================================ */
+
+async function initialize() {
+  const res = await fetch("/api/espn-games");
+  const data = await res.json();
+  window.liveGames = data.games || [];
+
+  await fetchScores();
+  await fetchOdds();
+  await fetchWeather();
+}
+
+initialize();
+
+// Auto-refresh every 1 hour
+setInterval(initialize, 3600000);
 
 </script>
-
 </body>
 </html>
