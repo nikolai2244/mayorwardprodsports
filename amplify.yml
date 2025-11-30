@@ -2,12 +2,12 @@ version: 1
 
 backend:
   phases:
-    preBuild:
+    install:
       commands:
         - npm ci
     build:
       commands:
-        - npm ci
+        - echo "Build complete"
   artifacts:
     baseDirectory: /
     files:
@@ -15,14 +15,3 @@ backend:
   cache:
     paths:
       - node_modules/**/*
-
-frontend:
-  phases:
-    preBuild:
-      commands:
-        - npm ci
-
-frontend_build:
-  phases:
-    build:
-      commands: []
