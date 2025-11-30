@@ -433,6 +433,77 @@
   display: block;
 }
 
+  /* Donation Section Styles */
+.donation-section {
+  background: linear-gradient(135deg, rgba(220, 20, 60, 0.15), rgba(0, 31, 63, 0.15));
+  border-radius: 15px;
+  padding: 30px;
+  margin: 40px 0;
+  border: 2px solid rgba(220, 20, 60, 0.3);
+  text-align: center;
+}
+.donation-title {
+  font-family: 'Permanent Marker', cursive;
+  font-size: 2em;
+  font-weight: 700;
+  color: var(--accent-primary);
+  margin-bottom: 15px;
+}
+.donation-text {
+  font-family: 'Indie Flower', cursive;
+  font-size: 1.05em;
+  color: var(--text-secondary);
+  line-height: 1.8;
+  margin-bottom: 25px;
+}
+.donation-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+.donation-btn {
+  padding: 12px 30px;
+  border-radius: 10px;
+  font-weight: 800;
+  font-size: 1em;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  font-family: 'Permanent Marker', cursive;
+  letter-spacing: 1px;
+  border: none;
+  text-transform: uppercase;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.gofundme-btn {
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  color: white;
+}
+.gofundme-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(220, 20, 60, 0.6);
+}
+.paypal-btn {
+  background: linear-gradient(135deg, #0070BA, #003087);
+  color: white;
+}
+.paypal-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(0, 112, 186, 0.6);
+}
+.venmo-btn {
+  background: linear-gradient(135deg, #3D95CE, #2E5F99);
+  color: white;
+}
+.venmo-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(61, 149, 206, 0.6);
+}
+
  @media (max-width: 768px) {
  .header { flex-direction: column; gap: 15px; padding: 20px; }
  .matchup-teams { flex-direction: column; }
@@ -465,24 +536,7 @@
  <div class="wave"></div>
  <div class="wave"></div>
  </div>
-         .donation-section {
-  background: linear-gradient(135deg, rgba(220, 20, 60, 0.15), rgba(0, 31, 63, 0.15));
-  border-radius: 15px;
-  padding: 30px;
-  margin: 40px 0;
-  border: 2px solid rgba(220, 20, 60, 0.3);
-  text-align: center;
-}
-.donation-title { font-family: 'Permanent Marker', cursive; font-size: 2em; font-weight: 700; color: var(--accent-primary); margin-bottom: 15px; }
-.donation-text { font-family: 'Indie Flower', cursive; font-size: 1.05em; color: var(--text-secondary); line-height: 1.8; margin-bottom: 25px; }
-.donation-buttons { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; }
-.donation-btn { padding: 12px 30px; border-radius: 10px; font-weight: 800; font-size: 1em; cursor: pointer; transition: all 0.3s ease; text-decoration: none; font-family: 'Permanent Marker', cursive; letter-spacing: 1px; border: none; text-transform: uppercase; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4); display: flex; align-items: center; gap: 8px; }
-.gofundme-btn { background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); color: white; }
-.gofundme-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(220, 20, 60, 0.6); }
-.paypal-btn { background: linear-gradient(135deg, #0070BA, #003087); color: white; }
-.paypal-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0, 112, 186, 0.6); }
-.venmo-btn { background: linear-gradient(135deg, #3D95CE, #2E5F99); color: white; }
-.venmo-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(61, 149, 206, 0.6); }
+ 
 
  <span>Loading ESPN Scores...</span>
  </div>
@@ -562,7 +616,7 @@
       </div>
       <div id="simulator-container" class="matchups-grid"></div>
     </div>
-  </div>533
+  </div>
   
   
 <script>
@@ -798,7 +852,6 @@ function runSimulation(awayTeam, homeTeam) {
  `;
 }
 
-767
  () {
  try {
 //  const [espnGames, oddsGames] = await Promise.all([
@@ -853,7 +906,6 @@ function runSimulation(awayTeam, homeTeam) {
  }
 }
 
-770
  ("DOMContentLoaded", initializeApp);
   
 // Tab Switching Function
@@ -885,12 +937,26 @@ function renderSimulatorGames(games) {
   
   container.innerHTML = '';
   
-  if (!games || games.length === 0) {
-    container.innerHTML = '<p style="text-align:center;color:var(--text-muted);">No games available for simulation.</p>';
-    return;
-  }
+  // Use fallback games if no games provided
+  let gamesToRender = games && games.length > 0 ? games : [
+    { away: 'GB', home: 'DET', date: 'Nov 27', time: '1:00 PM', status: 'Scheduled', awayScore: 0, homeScore: 0 },
+    { away: 'KC', home: 'DAL', date: 'Nov 27', time: '4:30 PM', status: 'Scheduled', awayScore: 0, homeScore: 0 },
+    { away: 'CIN', home: 'BAL', date: 'Nov 27', time: '8:20 PM', status: 'Scheduled', awayScore: 0, homeScore: 0 },
+    { away: 'CHI', home: 'PHI', date: 'Nov 28', time: '3:00 PM', status: 'Scheduled', awayScore: 0, homeScore: 0 },
+    { away: 'JAX', home: 'TEN', date: 'Nov 28', time: '5:30 PM', status: 'Scheduled', awayScore: 0, homeScore: 0 },
+    { away: 'LV', home: 'LAC', date: 'Nov 28', time: '8:15 PM', status: 'Scheduled', awayScore: 0, homeScore: 0 },
+    { away: 'LAR', home: 'CAR', date: 'Nov 30', time: '10:00 AM', status: 'Scheduled', awayScore: 0, homeScore: 0 },
+    { away: 'SF', home: 'CLE', date: 'Nov 30', time: '1:00 PM', status: 'Scheduled', awayScore: 0, homeScore: 0 },
+    { away: 'HOU', home: 'IND', date: 'Nov 30', time: '1:00 PM', status: 'Scheduled', awayScore: 0, homeScore: 0 },
+    { away: 'NO', home: 'MIA', date: 'Nov 30', time: '1:00 PM', status: 'Scheduled', awayScore: 0, homeScore: 0 },
+    { away: 'ATL', home: 'NYJ', date: 'Nov 30', time: '1:00 PM', status: 'Scheduled', awayScore: 0, homeScore: 0 },
+    { away: 'ARI', home: 'TB', date: 'Nov 30', time: '4:05 PM', status: 'Scheduled', awayScore: 0, homeScore: 0 },
+    { away: 'MIN', home: 'SEA', date: 'Nov 30', time: '4:05 PM', status: 'Scheduled', awayScore: 0, homeScore: 0 },
+    { away: 'BUF', home: 'PIT', date: 'Nov 30', time: '4:05 PM', status: 'Scheduled', awayScore: 0, homeScore: 0 },
+    { away: 'NYG', home: 'NE', date: 'Dec 1', time: '8:15 PM', status: 'Scheduled', awayScore: 0, homeScore: 0 }
+  ];
   
-  games.forEach(game => {
+  gamesToRender.forEach(game => {
     const home = teams[game.home];
     const away = teams[game.away];
     
