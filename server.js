@@ -1,3 +1,22 @@
+// server.js
+const express = require("express");
+const fetch = require("node-fetch");
+const path = require("path");
+
+const app = express();
+
+const PORT = process.env.PORT || 10000; // Render listens on this port internally
+const ODDS_API_KEY = process.env.ODDS_API_KEY || "35ea2bfd08888692d90a60bb91273c16";
+
+// Serve static files (index.html, etc.) from the root directory
+app.use(express.static(path.join(__dirname)));
+
+// Simple health check
+app.get("/api/status", (req, res) => {
+  res.json({ ok: true, message: "MayorWardProdSports proxy running" });
+});
+
+// Live odds proxy route
 app.get("/api/odds", async (req, res) => {
   try {
     const url =
@@ -13,6 +32,7 @@ app.get("/api/odds", async (req, res) => {
     const json = await apiRes.json();
 
     if (!apiRes.ok) {
+      console.error("The Odds API error:", apiRes.status, json);
       return res.status(apiRes.status).json({
         error: true,
         status: apiRes.status,
@@ -22,6 +42,7 @@ app.get("/api/odds", async (req, res) => {
 
     return res.json({ error: false, games: json });
   } catch (err) {
+    console.error("Proxy /api/odds error:", err);
     return res.status(500).json({
       error: true,
       status: 500,
@@ -29,3 +50,26 @@ app.get("/api/odds", async (req, res) => {
     });
   }
 });
+
+// Fallback weather example (optional)
+app.get("/api/weather", async (req, res) => {
+  const city = req.query.city || "Detroit";
+  res.json({
+    error: false,
+    city,
+    tempF: 72,
+    conditions: "Partly Cloudy",
+    windMph: 8
+  });
+});
+
+// Catch-all: always send index.html for other routes
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "index.html"));
+});
+
+// Start server
+app.listen(PORT, () => {
+  console.log(`MayorWardProdSports proxy listening on http://localhost:${PORT}`);
+});
+
