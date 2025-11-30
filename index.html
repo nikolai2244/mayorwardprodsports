@@ -234,9 +234,6 @@
  object-fit: contain;
  background: transparent;
  image-rendering: crisp-edges;
- -webkit-user-select: none;
- -moz-user-select: none;
- user-select: none;
  filter: drop-shadow(0 0 15px rgba(220, 20, 60, 0.5));
  animation: logoFloat 3s ease-in-out infinite;
  }
@@ -341,7 +338,6 @@
  justify-content: center;
  border: 2px solid rgba(220, 20, 60, 0.3);
  overflow: hidden;
- flex-shrink: 0;
  }
  .team-logo img {
  width: 100%;
@@ -350,4 +346,418 @@
  padding: 5px;
  }
  .team-name {
- font-weight:
+ font-weight: 700;
+ font-size: 1em;
+ color: var(--text-primary);
+ text-align: center;
+ }
+ .vs-badge {
+ color: var(--accent-primary);
+ font-weight: 800;
+ font-size: 1.2em;
+ padding: 0 10px;
+ }
+ .spread-badge {
+ background: rgba(255, 215, 0, 0
+.2);
+ border: 2px solid var(--accent-warning);
+ color: var(--accent-warning);
+ padding: 8px 16px;
+ border-radius: 20px;
+ font-weight: 700;
+ font-size: 0.9em;
+ text-align: center;
+ margin-top: 10px;
+ font-family: 'Permanent Marker', cursive;
+ }
+ .simulate-btn {
+ width: 100%;
+ padding: 16px 40px;
+ background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+ color: white;
+ border: none;
+ border-radius: 10px;
+ font-weight: 700;
+ font-size: 1.1em;
+ cursor: pointer;
+ transition: all 0.3s ease;
+ box-shadow: 0 4px 15px rgba(220, 20, 60, 0.4);
+ font-family: 'Permanent Marker', cursive;
+ letter-spacing: 1px;
+ text-transform: uppercase;
+ }
+ .simulate-btn:hover {
+ transform: translateY(-2px);
+ box-shadow: 0 6px 20px rgba(220, 20, 60, 0.6);
+ }
+ .simulate-btn:disabled {
+ opacity: 0.5;
+ cursor: not-allowed;
+ transform: none;
+ }
+ @media (max-width: 768px) {
+ .header { flex-direction: column; gap: 15px; padding: 20px; }
+ .matchup-teams { flex-direction: column; }
+ }
+ </style>
+</head>
+<body>
+ <div class="bg-grid"></div>
+ 
+ <div class="container">
+ <div class="beta-disclaimer">
+ <div class="beta-disclaimer-title">
+ <i class="fas fa-exclamation-triangle"></i> FIRST BETA MODE - DISCLAIMER
+ </div>
+ <div class="beta-disclaimer-text">
+ This platform is in its <strong>VERY FIRST BETA phase</strong>. While our models show promise, <strong>DO NOT use this simulator for live betting decisions</strong> without careful verification. Always double-check simulation results against current data. <strong>No prediction or simulation is guaranteed</strong> - use at your own risk.
+ </div>
+ </div>
+
+ <div class="welcome-banner">
+ <h1>Welcome to v1_0000001</h1>
+ <p>Our product is still a baby so please bear with us. Test this and do NOT rely on the simulator for your bets at this time. Please use the feedback form to let me know of any bugs or suggestions. - The Mayor</p>
+ <div class="data-status-container">
+ <div id="scoresStatus" class="data-status loading">
+ <div class="data-status-message">
+ <div class="radio-waves">
+ <div class="wave"></div>
+ <div class="wave"></div>
+ <div class="wave"></div>
+ <div class="wave"></div>
+ <div class="wave"></div>
+ </div>
+ <span>Loading ESPN Scores...</span>
+ </div>
+ <div class="data-status-timestamp" id="scoresTimestamp"></div>
+ </div>
+ <div id="oddsStatus" class="data-status loading">
+ <div class="data-status-message">
+ <div class="radio-waves">
+ <div class="wave"></div>
+ <div class="wave"></div>
+ <div class="wave"></div>
+ <div class="wave"></div>
+ <div class="wave"></div>
+ </div>
+ <span id="oddsStatusText">Loading Live Odds...</span>
+ </div>
+ <div class="data-status-timestamp" id="oddsTimestamp"></div>
+ </div>
+ </div>
+ </div>
+
+ <div class="header">
+ <div class="logo-section">
+ <img src="MW_LOGOnobackground.png" alt="MayorWard Logo" class="logo">
+ </div>
+ </div>
+
+ <div class="card">
+ <div class="card-header">
+ <h2>
+ <div class="logo-badge">
+ <img src="MW_LOGOnobackground.png" alt="Logo">
+ </div>
+ Live Games & Predictions
+ </h2>
+ </div>
+ <div id="matchups-container" class="matchups-grid"></div>
+ </div>
+
+ </div>
+
+<script>
+// ============================================
+// TEAM DATA & CONFIGURATION
+// ============================================
+
+const teamStrength = {
+ 'KC': 1.35, 'GB': 1.28, 'DET': 1.30, 'DAL': 1.22, 'CIN': 1.18,
+ 'BAL': 1.25, 'PHI': 1.32, 'SF': 1.31, 'BUF': 1.26, 'LAR': 1.12,
+ 'LAC': 1.15, 'MIN': 1.14, 'TB': 1.08, 'HOU': 1.16, 'IND': 0.95,
+ 'TEN': 0.98, 'NE': 0.85, 'NYJ': 0.92, 'CHI': 0.88, 'CAR': 0.82,
+ 'NO': 0.89, 'MIA': 1.10, 'ARI': 0.97, 'CLE': 1.06, 'PIT': 1.04,
+ 'SEA': 1.11, 'NYG': 0.91, 'JAX': 0.87, 'ATL': 0.90, 'LV': 0.86
+};
+
+const teams = {
+ 'KC': { name: 'Kansas City Chiefs', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/kc.png' },
+ 'GB': { name: 'Green Bay Packers', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/gb.png' },
+ 'DET': { name: 'Detroit Lions', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/det.png' },
+ 'DAL': { name: 'Dallas Cowboys', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/dal.png' },
+ 'CIN': { name: 'Cincinnati Bengals', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/cin.png' },
+ 'BAL': { name: 'Baltimore Ravens', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/bal.png' },
+ 'CHI': { name: 'Chicago Bears', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/chi.png' },
+ 'PHI': { name: 'Philadelphia Eagles', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/phi.png' },
+ 'JAX': { name: 'Jacksonville Jaguars', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/jax.png' },
+ 'TEN': { name: 'Tennessee Titans', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/ten.png' },
+ 'LV': { name: 'Las Vegas Raiders', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/lv.png' },
+ 'LAC': { name: 'Los Angeles Chargers', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/lac.png' },
+ 'LAR': { name: 'Los Angeles Rams', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/lar.png' },
+ 'CAR': { name: 'Carolina Panthers', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/car.png' },
+ 'SF': { name: 'San Francisco 49ers', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/sf.png' },
+ 'CLE': { name: 'Cleveland Browns', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/cle.png' },
+ 'HOU': { name: 'Houston Texans', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/hou.png' },
+ 'IND': { name: 'Indianapolis Colts', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/ind.png' },
+ 'NO': { name: 'New Orleans Saints', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/no.png' },
+ 'MIA': { name: 'Miami Dolphins', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/mia.png' },
+ 'ATL': { name: 'Atlanta Falcons', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/atl.png' },
+ 'NYJ': { name: 'New York Jets', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/nyj.png' },
+ 'ARI': { name: 'Arizona Cardinals', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/ari.png' },
+ 'TB': { name: 'Tampa Bay Buccaneers', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/tb.png' },
+ 'MIN': { name: 'Minnesota Vikings', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/min.png' },
+ 'SEA': { name: 'Seattle Seahawks', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/sea.png' },
+ 'BUF': { name: 'Buffalo Bills', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/buf.png' },
+ 'PIT': { name: 'Pittsburgh Steelers', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/pit.png' },
+ 'NYG': { name: 'New York Giants', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/nyg.png' },
+ 'NE': { name: 'New England Patriots', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/ne.png' }
+};
+
+let liveGames = [];
+let liveOdds = [];
+
+// ============================================
+// API FETCHING FUNCTIONS
+// ============================================
+
+function formatDateTime(date) {
+ const options = { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+ return date.toLocaleDateString('en-US', options);
+}
+
+function updateOddsStatus(connected) {
+ const oddsDiv = document.getElementById('oddsStatus');
+ const statusText = document.getElementById('oddsStatusText');
+ const timestamp = document.getElementById('oddsTimestamp');
+ 
+ if (connected) {
+ oddsDiv.className = 'data-status success';
+ statusText.textContent = 'Live Odds Connected';
+ timestamp.innerHTML = `Updated: ${formatDateTime(new Date())}`;
+ } else {
+ oddsDiv.className = 'data-status error';
+ statusText.textContent = 'Live Odds Unavailable';
+ timestamp.innerHTML = 'Using fallback data';
+ }
+}
+
+function updateScoresStatus(connected) {
+ const scoresDiv = document.getElementById('scoresStatus');
+ const timestamp = document.getElementById('scoresTimestamp');
+ 
+ if (connected) {
+ scoresDiv.className = 'data-status success';
+ scoresDiv.querySelector('.data-status-message span').textContent = 'ESPN Scores Live';
+ timestamp.innerHTML = `Updated: ${formatDateTime(new Date())}`;
+ } else {
+ scoresDiv.className = 'data-status error';
+ scoresDiv.querySelector('.data-status-message span').textContent = 'ESPN Connection Error';
+ timestamp.innerHTML = 'Using fallback data';
+ }
+}
+
+async function fetchESPNGames() {
+ try {
+ const res = await fetch("/api/espn-games");
+ const data = await res.json();
+ 
+ if (data.error || !Array.isArray(data.games)) {
+ console.error("ESPN API error:", data);
+ updateScoresStatus(false);
+ return [];
+ }
+ 
+ updateScoresStatus(true);
+ return data.games.map(event => {
+ const competition = event.competitions?.[0];
+ const homeTeam = competition?.competitors?.find(c => c.homeAway === 'home');
+ const awayTeam = competition?.competitors?.find(c => c.homeAway === 'away');
+ 
+ return {
+ away: awayTeam?.team?.abbreviation || 'TBD',
+ home: homeTeam?.team?.abbreviation || 'TBD',
+ awayScore: awayTeam?.score || 0,
+ homeScore: homeTeam?.score || 0,
+ status: event.status?.type?.description || 'Scheduled',
+ date: new Date(event.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+ time: new Date(event.date).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+ };
+ });
+ } catch (error) {
+ console.error("ESPN fetch error:", error);
+ updateScoresStatus(false);
+ return [];
+ }
+}
+
+async function fetchLiveOdds() {
+ try {
+ const res = await fetch("/api/odds");
+ const data = await res.json();
+ 
+ if (data.error || !Array.isArray(data.games)) {
+ console.error("Odds API error:", data);
+ updateOddsStatus(false);
+ return [];
+ }
+ 
+ updateOddsStatus(true);
+ return data.games;
+ } catch (error) {
+ console.error("Odds fetch error:", error);
+ updateOddsStatus(false);
+ return [];
+ }
+}
+
+function renderGames(games) {
+ const container = document.getElementById('matchups-container');
+ if (!container) return;
+ 
+ container.innerHTML = '';
+ 
+ if (!games || games.length === 0) {
+ container.innerHTML = '<p style="text-align:center;color:var(--text-muted);">No games available at this time.</p>';
+ return;
+ }
+ 
+ games.forEach(game => {
+ const home = teams[game.home];
+ const away = teams[game.away];
+ 
+ if (!home || !away) return;
+ 
+ const odds = liveOdds.find(o
+ => 
+ o.away_team === game.away && o.home_team === game.home
+ );
+ 
+ const spread = odds?.bookmakers?.[0]?.markets?.find(m => m.key === 'spreads')
+ ?.outcomes?.find(o => o.name === odds.home_team)?.point || 'N/A';
+ 
+ const card = document.createElement('div');
+ card.className = 'matchup-card';
+ card.innerHTML = `
+ <div class="matchup-header">
+ <div>
+ <div class="matchup-day">${game.status || 'Scheduled'}</div>
+ <div class="matchup-date">${game.date || 'TBD'}</div>
+ </div>
+ <div class="matchup-kickoff">${game.time || 'TBD'}</div>
+ </div>
+ <div class="matchup-teams">
+ <div class="team-section">
+ <div class="team-logo">
+ <img src="${away.logo}" alt="${away.name}">
+ </div>
+ <div class="team-name">${away.name}</div>
+ ${game.awayScore > 0 ? `<div style="font-size:2em;color:var(--accent-success);font-weight:900;">${game.awayScore}</div>` : ''}
+ </div>
+ <div class="vs-badge">@</div>
+ <div class="team-section">
+ <div class="team-logo">
+ <img src="${home.logo}" alt="${home.name}">
+ </div>
+ <div class="team-name">${home.name}</div>
+ ${game.homeScore > 0 ? `<div style="font-size:2em;color:var(--accent-success);font-weight:900;">${game.homeScore}</div>` : ''}
+ ${spread !== 'N/A' ? `<div class="spread-badge">Spread: ${spread > 0 ? '+' : ''}${spread}</div>` : ''}
+ </div>
+ </div>
+ <button class="simulate-btn" onclick="runSimulation('${game.away}', '${game.home}')">
+ <i class="fas fa-play"></i> RUN SIMULATION
+ </button>
+ <div id="result-${game.away}-${game.home}" style="margin-top:15px;"></div>
+ `;
+ container.appendChild(card);
+ });
+}
+
+function runSimulation(awayTeam, homeTeam) {
+ const resultDiv = document.getElementById(`result-${awayTeam}-${homeTeam}`);
+ if (!resultDiv) return;
+ 
+ const awayStrength = teamStrength[awayTeam] || 1.0;
+ const homeStrength = teamStrength[homeTeam] || 1.0;
+ 
+ const homeBase = 21 + (homeStrength - 1) * 10;
+ const awayBase = 21 + (awayStrength - 1) * 10;
+ 
+ const homeScore = Math.max(0, Math.round(homeBase + (Math.random() * 14 - 7)));
+ const awayScore = Math.max(0, Math.round(awayBase + (Math.random() * 14 - 7)));
+ 
+ const winner = homeScore > awayScore ? homeTeam : awayTeam;
+ const winnerName = teams[winner]?.name || winner;
+ 
+ resultDiv.innerHTML = `
+ <div style="background:rgba(0,255,135,0.1);border:2px solid var(--accent-success);border-radius:10px;padding:20px;text-align:center;">
+ <div style="font-family:'Permanent Marker',cursive;font-size:1.5em;color:var(--accent-success);margin-bottom:10px;">
+ SIMULATION RESULT
+ </div>
+ <div style="font-size:2em;font-weight:900;color:var(--accent-primary);margin-bottom:10px;">
+ ${teams[awayTeam]?.name}: ${awayScore} | ${teams[homeTeam]?.name}: ${homeScore}
+ </div>
+ <div style="font-size:1.2em;color:var(--accent-warning);">
+ Projected Winner: <strong>${winnerName}</strong>
+ </div>
+ </div>
+ `;
+}
+
+async function initializeApp() {
+ try {
+ const [espnGames, oddsGames] = await Promise.all([
+ fetchESPNGames(),
+ fetchLiveOdds()
+ ]);
+ 
+ liveGames = espnGames;
+ liveOdds = oddsGames;
+ 
+ if (espnGames.length > 0) {
+ renderGames(espnGames);
+ } else {
+ const fallbackGames = [
+ { away: 'GB', home: 'DET', date: 'Nov 27', time: '1:00 PM', status: 'Scheduled', awayScore: 0, homeScore: 0 },
+ { away: 'KC', home: 'DAL', date: 'Nov 27', time: '4:30 PM', status: 'Scheduled', awayScore: 0, homeScore: 0 },
+ { away: 'CIN', home: 'BAL', date: 'Nov 27', time: '8:20 PM', status: 'Scheduled', awayScore: 0, homeScore: 0 },
+ { away: 'CHI', home: 'PHI', date: 'Nov 28', time: '3:00 PM', status: 'Scheduled', awayScore: 0, homeScore: 0 },
+ { away: 'JAX', home: 'TEN', date: 'Nov 28', time: '5:30 PM', status: 'Scheduled', awayScore: 0, homeScore: 0 },
+ { away: 'LV', home: 'LAC', date: 'Nov 28', time: '8:15 PM', status: 'Scheduled', awayScore: 0, homeScore: 0 },
+ { away: 'LAR', home: 'CAR', date: 'Nov 30', time: '10:00 AM', status: 'Scheduled', awayScore: 0, homeScore: 0 },
+ { away: 'SF', home: 'CLE', date: 'Nov 30', time: '1:00 PM', status: 'Scheduled', awayScore: 0, homeScore: 0 },
+ { away: 'HOU', home: 'IND', date: 'Nov 30', time: '1:00 PM', status: 'Scheduled', awayScore: 0, homeScore: 0 },
+ { away: 'NO', home: 'MIA', date: 'Nov 30', time: '1:00 PM', status: 'Scheduled', awayScore: 0, homeScore: 0 },
+ { away: 'ATL', home: 'NYJ', date: 'Nov 30', time: '1:00 PM', status: 'Scheduled', awayScore: 0, homeScore: 0 },
+ { away: 'ARI', home: 'TB', date: 'Nov 30', time: '4:05 PM', status: 'Scheduled', awayScore: 0, homeScore: 0 },
+ { away: 'MIN', home: 'SEA', date: 'Nov 30', time: '4:05 PM', status: 'Scheduled', awayScore: 0, homeScore: 0 },
+ { away: 'BUF', home: 'PIT', date: 'Nov 30', time: '4:05 PM', status: 'Scheduled', awayScore: 0, homeScore: 0 },
+ { away: 'NYG', home: 'NE', date: 'Dec 1', time: '8:15 PM', status: 'Scheduled', awayScore: 0, homeScore: 0 }
+ ];
+ renderGames(fallbackGames);
+ }
+ 
+ setInterval(async () => {
+ const [espnGames, oddsGames] = await Promise.all([
+ fetchESPNGames(),
+ fetchLiveOdds()
+ ]);
+ liveGames = espnGames;
+ liveOdds = oddsGames;
+ if (espnGames.length > 0) {
+ renderGames(espnGames);
+ }
+ }, 60000);
+ 
+ } catch (error) {
+ console.error("Error loading data:", error);
+ updateScoresStatus(false);
+ updateOddsStatus(false);
+ }
+}
+
+document.addEventListener("DOMContentLoaded", initializeApp);
+</script>
+
+</body>
+</html>
