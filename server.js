@@ -93,6 +93,11 @@ app.get("*", (req, res) => {
 });
 
 // Start server
-app.listen(PORT, () => {
-  console.log(`MayorWardProdSports proxy listening on http://localhost:${PORT}`);
-});
+// Only start server locally, not in Vercel
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`MayorWard ProdSports proxy listening on http://localhost:${PORT}`);
+  });
+}
+
+module.exports = app;
