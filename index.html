@@ -1,413 +1,353 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <title>MayorWardProdSports – NFL Simulator</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-    <style>
-        body {
-            margin: 0;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-            background-color: #050509;
-            color: #f5f5f5;
-        }
-
-        .page-wrap {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 16px;
-        }
-
-        header {
-            padding: 12px 0 4px 0;
-            border-bottom: 1px solid #333;
-        }
-
-        .site-title {
-            font-size: 1.8rem;
-            font-weight: 700;
-            letter-spacing: 0.05em;
-            color: #ff4df2;
-        }
-
-        .subtitle {
-            font-size: 0.9rem;
-            color: #aaa;
-        }
-
-        .status-line {
-            margin: 16px 0 8px 0;
-            font-size: 0.9rem;
-        }
-
-        .games-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-            gap: 12px;
-            margin-bottom: 24px;
-        }
-
-        .game-card {
-            background: radial-gradient(circle at top left, #2a103a 0%, #130918 40%, #050509 100%);
-            border-radius: 10px;
-            padding: 10px 12px;
-            border: 1px solid rgba(255, 77, 242, 0.25);
-            box-shadow: 0 0 18px rgba(255, 77, 242, 0.15);
-        }
-
-        .teams-row {
-            display: flex;
-            justify-content: space-between;
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 6px;
-        }
-
-        .team {
-            color: #ff4d4d;
-        }
-
-        .team.home {
-            color: #b76dff;
-        }
-
-        .vs {
-            font-size: 0.9rem;
-            color: #bbb;
-        }
-
-        .meta-row {
-            font-size: 0.83rem;
-            color: #c0c0c0;
-            margin-bottom: 6px;
-        }
-
-        .odds-row {
-            font-size: 0.85rem;
-            margin-bottom: 6px;
-        }
-
-        .odds-row span {
-            display: block;
-        }
-
-        .scorers-row {
-            font-size: 0.8rem;
-            color: #ddd;
-        }
-
-        .section-title {
-            margin: 24px 0 8px 0;
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: #ffc04d;
-        }
-
-        .sim-cta {
-            margin: 12px 0 24px 0;
-            font-size: 0.9rem;
-            color: #ddd;
-        }
-
-        .btn-primary {
-            display: inline-block;
-            padding: 10px 16px;
-            border-radius: 6px;
-            border: none;
-            cursor: pointer;
-            background: linear-gradient(90deg, #ff4d4d, #ff4df2);
-            color: #050509;
-            font-weight: 600;
-            font-size: 0.92rem;
-            box-shadow: 0 0 14px rgba(255, 77, 242, 0.4);
-        }
-
-        .btn-primary:active {
-            transform: translateY(1px);
-            box-shadow: 0 0 10px rgba(255, 77, 242, 0.3);
-        }
-
-        .footer-note {
-            font-size: 0.78rem;
-            color: #999;
-            margin-top: 24px;
-            border-top: 1px solid #222;
-            padding-top: 10px;
-        }
-
-        .odds-loader {
-            height: 2px;
-            width: 110px;
-            background: linear-gradient(90deg, #ff4d4d, #b76dff);
-            background-size: 200% 100%;
-            animation: scan 1.1s linear infinite;
-            border-radius: 2px;
-            margin-top: 4px;
-        }
-
-        @keyframes scan {
-            0% { background-position: 0% 0%; }
-            100% { background-position: 200% 0%; }
-        }
-    </style>
-</head>
-<body>
-<div class="page-wrap">
-    <header>
-        <div class="site-title">MayorWardProdSports – NFL AI Simulator</div>
-        <div class="subtitle">Live odds when available • Smart fallbacks when they’re not</div>
-    </header>
-
-    <div class="section-title">Live Games & Vegas Lines</div>
-    <div id="odds-status" class="status-line">
-        <span>Connecting to live odds…</span>
-        <div class="odds-loader" id="odds-loader"></div>
-    </div>
-    <div id="games-container" class="games-grid"></div>
-
-    <div class="section-title">Simulation Lab</div>
-    <div class="sim-cta">
-        Click RUN SIMULATION to run AI-powered projections based on current lines and team strength.
-        This is an experimental tool – test it, do not rely on it to bet real money.
-    </div>
-    <button class="btn-primary" id="run-sim-btn">RUN SIMULATION</button>
-    <div id="sim-output" style="margin-top:10px;font-size:0.9rem;color:#eee;"></div>
-
-    <div class="footer-note">
-        Our product is still a baby – expect updates and improvements all season long.
-        Please use the feedback form on the site to report bugs or ideas.
-    </div>
-</div>
-
-<script>
-const teamStrength = {
-  'KC': 1.35, 'GB': 1.28, 'DET': 1.30, 'DAL': 1.22, 'CIN': 1.18,
-  'BAL': 1.25, 'PHI': 1.32, 'SF': 1.31, 'BUF': 1.26, 'LAR': 1.12,
-  'LAC': 1.15, 'MIN': 1.14, 'TB': 1.08, 'HOU': 1.16, 'IND': 0.95,
-  'TEN': 0.98, 'NE': 0.85, 'NYJ': 0.92, 'CHI': 0.88, 'CAR': 0.82,
-  'NO': 0.89, 'MIA': 1.10, 'ARI': 0.97, 'CLE': 1.06, 'PIT': 1.04,
-  'SEA': 1.11, 'NYG': 0.91, 'JAX': 0.87, 'ATL': 0.90, 'LV': 0.86
-};
-
-const fallbackMatchups = [
-  { away: 'GB', home: 'DET', date: 'November 27, 2025', day: 'Thursday', kickoff: '1:00 PM EST' },
-  { away: 'KC', home: 'DAL', date: 'November 27, 2025', day: 'Thursday', kickoff: '4:30 PM EST' },
-  { away: 'CIN', home: 'BAL', date: 'November 27, 2025', day: 'Thursday', kickoff: '8:20 PM EST' },
-  { away: 'CHI', home: 'PHI', date: 'November 28, 2025', day: 'Friday',  kickoff: '3:00 PM EST' },
-  { away: 'JAX', home: 'TEN', date: 'November 28, 2025', day: 'Friday',  kickoff: '5:30 PM EST' },
-  { away: 'LV', home: 'LAC', date: 'November 28, 2025', day: 'Friday',  kickoff: '8:15 PM EST' },
-  { away: 'LAR', home: 'CAR', date: 'November 30, 2025', day: 'Sunday',  kickoff: '10:00 AM EST' },
-  { away: 'SF',  home: 'CLE', date: 'November 30, 2025', day: 'Sunday',  kickoff: '1:00 PM EST' },
-  { away: 'HOU', home: 'IND', date: 'November 30, 2025', day: 'Sunday',  kickoff: '1:00 PM EST' },
-  { away: 'NO',  home: 'MIA', date: 'November 30, 2025', day: 'Sunday',  kickoff: '1:00 PM EST' },
-  { away: 'ATL', home: 'NYJ', date: 'November 30, 2025', day: 'Sunday',  kickoff: '1:00 PM EST' },
-  { away: 'ARI', home: 'TB',  date: 'November 30, 2025', day: 'Sunday',  kickoff: '4:05 PM EST' },
-  { away: 'MIN', home: 'SEA', date: 'November 30, 2025', day: 'Sunday',  kickoff: '4:05 PM EST' },
-  { away: 'BUF', home: 'PIT', date: 'November 30, 2025', day: 'Sunday',  kickoff: '4:05 PM EST' },
-  { away: 'NYG', home: 'NE',  date: 'December 1, 2025',  day: 'Monday',  kickoff: '8:15 PM EST' }
-];
-
-const fallbackTopScorers = {
-  'KC': ['Patrick Mahomes', 'Travis Kelce', 'Rashee Rice'],
-  'GB': ['Jordan Love', 'Romeo Doubs', 'Christian Watson'],
-  'DET': ['Jared Goff', 'Amon-Ra St. Brown', 'Sam LaPorta'],
-  'DAL': ['Dak Prescott', 'CeeDee Lamb', 'Tony Pollard'],
-  'CIN': ['Joe Burrow', 'Ja\'Marr Chase', 'Tee Higgins'],
-  'BAL': ['Lamar Jackson', 'Mark Andrews', 'Zay Flowers'],
-  'PHI': ['Jalen Hurts', 'A.J. Brown', 'DeVonta Smith'],
-  'SF':  ['Brock Purdy', 'Deebo Samuel', 'Christian McCaffrey'],
-  'BUF': ['Josh Allen', 'Stefon Diggs', 'Dalton Kincaid'],
-  'LAR': ['Matthew Stafford', 'Cooper Kupp', 'Puka Nacua'],
-  'LAC': ['Justin Herbert', 'Keenan Allen', 'Josh Palmer'],
-  'MIN': ['Kirk Cousins', 'Justin Jefferson', 'Jordan Addison'],
-  'TB':  ['Baker Mayfield', 'Mike Evans', 'Chris Godwin'],
-  'HOU': ['C.J. Stroud', 'Nico Collins', 'Tank Dell'],
-  'IND': ['Anthony Richardson', 'Michael Pittman Jr.', 'Jonathan Taylor'],
-  'TEN': ['Will Levis', 'DeAndre Hopkins', 'Derrick Henry'],
-  'NE':  ['Mac Jones', 'Kendrick Bourne', 'Rhamondre Stevenson'],
-  'NYJ': ['Aaron Rodgers', 'Garrett Wilson', 'Breece Hall'],
-  'CHI': ['Justin Fields', 'D.J. Moore', 'Cole Kmet'],
-  'CAR': ['Bryce Young', 'Adam Thielen', 'Jonathan Mingo'],
-  'NO':  ['Derek Carr', 'Chris Olave', 'Alvin Kamara'],
-  'MIA': ['Tua Tagovailoa', 'Tyreek Hill', 'Jaylen Waddle'],
-  'ARI': ['Kyler Murray', 'Marquise Brown', 'James Conner'],
-  'CLE': ['Deshaun Watson', 'Amari Cooper', 'Nick Chubb'],
-  'PIT': ['Kenny Pickett', 'George Pickens', 'Najee Harris'],
-  'SEA': ['Geno Smith', 'DK Metcalf', 'Tyler Lockett'],
-  'NYG': ['Daniel Jones', 'Saquon Barkley', 'Darren Waller'],
-  'JAX': ['Trevor Lawrence', 'Calvin Ridley', 'Travis Etienne'],
-  'ATL': ['Desmond Ridder', 'Drake London', 'Bijan Robinson'],
-  'LV':  ['Jimmy Garoppolo', 'Davante Adams', 'Josh Jacobs']
-};
-
-let liveMatchups = [];
-let liveOddsData = [];
-let hasLiveGames = false;
-let lastOddsUpdate = null;
-
-function formatDateTime(dateStr, timeStr) {
-  return `${dateStr} • ${timeStr}`;
-}
-
-function updateOddsStatus(message, ok = true) {
-  const wrapper = document.getElementById("odds-status");
-  const loader = document.getElementById("odds-loader");
-  if (!wrapper) return;
-  const span = wrapper.querySelector("span");
-  if (span) span.textContent = message;
-  wrapper.style.color = ok ? "#7CFC00" : "#ff4d4d";
-  if (loader) {
-    loader.style.display = ok && message.toLowerCase().includes("connecting")
-      ? "block"
-      : "none";
-  }
-}
-
-function renderMatchups() {
-  const container = document.getElementById("games-container");
-  if (!container) return;
-
-  container.innerHTML = "";
-  const data = liveMatchups.length ? liveMatchups : fallbackMatchups;
-
-  data.forEach(game => {
-    const card = document.createElement("div");
-    card.className = "game-card";
-
-    const away = game.away;
-    const home = game.home;
-
-    const odds = liveOddsData.find(
-      g => g.away_team === away && g.home_team === home
-    );
-
-    const scorerListAway = (fallbackTopScorers[away] || []).join(", ");
-    const scorerListHome = (fallbackTopScorers[home] || []).join(", ");
-
-    const homeSpread = odds
-      ? (odds.bookmakers?.[0]?.markets?.find(m => m.key === "spreads")
-           ?.outcomes?.find(o => o.name === odds.home_team)?.point ?? "N/A")
-      : null;
-
-    const totalPoints = odds
-      ? (odds.bookmakers?.[0]?.markets?.find(m => m.key === "totals")
-           ?.outcomes?.[0]?.point ?? "N/A")
-      : null;
-
-    card.innerHTML = `
-      <div class="teams-row">
-        <span class="team away">${away}</span>
-        <span class="vs">at</span>
-        <span class="team home">${home}</span>
-      </div>
-      <div class="meta-row">
-        ${formatDateTime(game.date || "Today", game.kickoff || "TBD")}
-      </div>
-      <div class="odds-row">
-        ${
-          odds
-            ? `
-          <span>Home spread: ${homeSpread}</span>
-          <span>Total: ${totalPoints}</span>
-        `
-            : `<span>Live odds unavailable – using projected lines.</span>`
-        }
-      </div>
-      <div class="scorers-row">
-        <strong>${away} key scorers:</strong> ${scorerListAway || "TBD"}<br>
-        <strong>${home} key scorers:</strong> ${scorerListHome || "TBD"}
-      </div>
-    `;
-    container.appendChild(card);
-  });
-}
-
-function useFallbackMatchups(reasonText) {
-  liveMatchups = fallbackMatchups.slice();
-  hasLiveGames = true;
-  updateOddsStatus(
-    reasonText || "Using scheduled matchups – live odds unavailable.",
-    false
-  );
-  renderMatchups();
-}
-
-async function fetchLiveOdds() {
-  updateOddsStatus("Connecting to live odds…", true);
-  try {
-    const res = await fetch("/api/odds");
-    if (!res.ok) {
-      const text = await res.text();
-      console.error("ODDS API HTTP ERROR:", res.status, text);
-      useFallbackMatchups("Live odds service error – using scheduled matchups.");
-      return;
-    }
-
-    const data = await res.json();
-    if (data.error || !Array.isArray(data.games)) {
-      console.error("ODDS API DATA ERROR:", data);
-      useFallbackMatchups("Live odds unavailable – using scheduled matchups.");
-      return;
-    }
-
-    liveOddsData = data.games;
-    liveMatchups = data.games.map(g => ({
-      away: g.away_team,
-      home: g.home_team,
-      date: "Today",
-      day: "",
-      kickoff: "TBD"
-    }));
-
-    hasLiveGames = !!liveMatchups.length;
-    lastOddsUpdate = new Date();
-
-    updateOddsStatus("Live odds connected.", true);
-    renderMatchups();
-  } catch (error) {
-    console.error("ODDS FETCH ERROR:", error);
-    useFallbackMatchups("Live odds connection failed – using scheduled matchups.");
-  }
-}
-
-function runSimpleSimulation() {
-  const outputEl = document.getElementById("sim-output");
-  if (!outputEl) return;
-
-  const games = liveMatchups.length ? liveMatchups : fallbackMatchups;
-  if (!games.length) {
-    outputEl.textContent = "No games available to simulate right now.";
-    return;
-  }
-
-  const simulated = games.map(game => {
-    const awayStrength = teamStrength[game.away] || 1.0;
-    const homeStrength = teamStrength[game.home] || 1.0;
-
-    const strengthDiff = homeStrength - awayStrength;
-    const noise = (Math.random() - 0.5) * 0.6;
-    const score = strengthDiff + noise;
-
-    const winner = score >= 0 ? game.home : game.away;
-    return `${game.away} at ${game.home} → projected edge: ${winner}`;
-  });
-
-  outputEl.innerHTML = simulated.join("<br>");
-}
-
-async function initializeApp() {
-  renderMatchups();
-  await fetchLiveOdds();
-
-  const simBtn = document.getElementById("run-sim-btn");
-  if (simBtn) {
-    simBtn.addEventListener("click", runSimpleSimulation);
-  }
-}
-
-document.addEventListener("DOMContentLoaded", initializeApp);
-</script>
-
-</body>
-</html>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>MayorWard ProdSports | Elite NFL Simulation Platform</title>
+ <link href="https://fonts.googleapis.com/css2?family=Indie+Flower&family=Permanent+Marker&family=Caveat:wght@400;700&family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+ <style>
+ :root {
+ --mw-red: #DC143C;
+ --mw-black: #000000;
+ --mw-white: #FFFFFF;
+ --mw-navy: #001F3F;
+ --mw-red-glow: rgba(220, 20, 60, 0.6);
+ --bg-primary: #000000;
+ --bg-secondary: #0a0a0a;
+ --bg-card: #121212;
+ --bg-elevated: #1a1a1a;
+ --accent-primary: #DC143C;
+ --accent-secondary: #FF1744;
+ --accent-success: #00FF87;
+ --accent-warning: #FFD700;
+ --text-primary: #FFFFFF;
+ --text-secondary: #CCCCCC;
+ --text-muted: #888888;
+ --border-color: rgba(220, 20, 60, 0.3);
+ }
+ * {
+ margin: 0;
+ padding: 0;
+ box-sizing: border-box;
+ }
+ body {
+ font-family: 'Inter', system-ui, -apple-system, sans-serif;
+ background: #000000;
+ color: var(--text-primary);
+ min-height: 100vh;
+ overflow-x: hidden;
+ position: relative;
+ }
+ .bg-grid {
+ position: fixed;
+ top: 0;
+ left: 0;
+ width: 100%;
+ height: 100%;
+ background: 
+ radial-gradient(ellipse at 30% 40%, rgba(220, 20, 60, 0.12) 0%, transparent 50%),
+ radial-gradient(ellipse at 70% 60%, rgba(0, 31, 63, 0.08) 0%, transparent 50%);
+ z-index: 0;
+ pointer-events: none;
+ animation: backgroundPulse 25s ease-in-out infinite;
+ }
+ @keyframes backgroundPulse {
+ 0%, 100% { opacity: 0.5; }
+ 50% { opacity: 0.8; }
+ }
+ .container {
+ position: relative;
+ z-index: 1;
+ max-width: 1600px;
+ margin: 0 auto;
+ padding: 20px;
+ }
+ .beta-disclaimer {
+ background: linear-gradient(135deg, rgba(255, 69, 0, 0.25), rgba(255, 215, 0, 0.15));
+ border: 2px solid rgba(255, 215, 0, 0.5);
+ border-radius: 15px;
+ padding: 25px;
+ margin-bottom: 25px;
+ box-shadow: 0 0 30px rgba(255, 215, 0, 0.2);
+ text-align: center;
+ }
+ .beta-disclaimer-title {
+ font-family: 'Permanent Marker', cursive;
+ font-size: 1.8em;
+ font-weight: 700;
+ color: var(--accent-warning);
+ margin-bottom: 12px;
+ letter-spacing: 1px;
+ }
+ .beta-disclaimer-text {
+ font-family: 'Indie Flower', cursive;
+ font-size: 1em;
+ line-height: 1.7;
+ color: var(--text-secondary);
+ margin-bottom: 10px;
+ }
+ .beta-disclaimer-text strong {
+ color: var(--accent-secondary);
+ font-weight: 700;
+ }
+ .logo-badge {
+ width: 40px;
+ height: 40px;
+ border-radius: 50%;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ background: linear-gradient(135deg, rgba(220, 20, 60, 0.2), rgba(0, 31, 63, 0.2));
+ border: 2px solid rgba(220, 20, 60, 0.5);
+ box-shadow: 0 0 15px rgba(220, 20, 60, 0.3);
+ flex-shrink: 0;
+ }
+ .logo-badge img {
+ width: 90%;
+ height: 90%;
+ object-fit: contain;
+ }
+ .welcome-banner {
+ background: linear-gradient(135deg, rgba(220, 20, 60, 0.25), rgba(0, 31, 63, 0.25));
+ backdrop-filter: blur(20px);
+ border: 2px solid rgba(220, 20, 60, 0.5);
+ border-radius: 15px;
+ padding: 30px;
+ margin-bottom: 30px;
+ box-shadow: 0 0 40px rgba(220, 20, 60, 0.2);
+ text-align: center;
+ }
+ .welcome-banner h1 {
+ font-family: 'Permanent Marker', cursive;
+ font-size: 2.8em;
+ font-weight: 700;
+ color: var(--accent-primary);
+ margin-bottom: 15px;
+ text-shadow: 0 0 10px rgba(220, 20, 60, 0.6);
+ letter-spacing: 2px;
+ }
+ .welcome-banner p {
+ font-family: 'Indie Flower', cursive;
+ font-size: 1.05em;
+ line-height: 1.8;
+ color: var(--text-secondary);
+ }
+ .data-status-container {
+ display: flex;
+ gap: 15px;
+ margin-top: 20px;
+ flex-wrap: wrap;
+ justify-content: center;
+ }
+ .data-status {
+ background: rgba(0, 255, 135, 0.1);
+ border: 1px solid rgba(0, 255, 135, 0.3);
+ border-radius: 8px;
+ padding: 12px 20px;
+ text-align: center;
+ font-size: 0.9em;
+ color: var(--accent-success);
+ font-weight: 600;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ gap: 8px;
+ flex: 1;
+ min-width: 250px;
+ flex-direction: column;
+ }
+ .radio-waves {
+ display: flex;
+ gap: 4px;
+ align-items: center;
+ height: 20px;
+ }
+ .wave {
+ width: 3px;
+ background: var(--accent-success);
+ border-radius: 2px;
+ animation: wave 1.2s ease-in-out infinite;
+ }
+ .wave:nth-child(1) { animation-delay: 0s; }
+ .wave:nth-child(2) { animation-delay: 0.2s; }
+ .wave:nth-child(3) { animation-delay: 0.4s; }
+ .wave:nth-child(4) { animation-delay: 0.6s; }
+ .wave:nth-child(5) { animation-delay: 0.8s; }
+ @keyframes wave {
+ 0%, 100% { height: 5px; }
+ 50% { height: 20px; }
+ }
+ .data-status.loading {
+ background: rgba(255, 215, 0, 0.1);
+ border-color: rgba(255, 215, 0, 0.3);
+ color: var(--accent-warning);
+ }
+ .data-status.error {
+ background: rgba(255, 69, 0, 0.1);
+ border-color: rgba(255, 69, 0, 0.3);
+ color: var(--accent-secondary);
+ }
+ .data-status.success {
+ background: rgba(0, 255, 135, 0.1);
+ border-color: rgba(0, 255, 135, 0.3);
+ color: var(--accent-success);
+ }
+ .data-status-timestamp {
+ font-size: 0.8em;
+ color: var(--text-muted);
+ margin-top: 4px;
+ }
+ .data-status-message {
+ font-size: 0.9em;
+ font-weight: 600;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ gap: 8px;
+ }
+ .header {
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ padding: 35px 45px;
+ background: linear-gradient(135deg, rgba(10, 10, 10, 0.98), rgba(18, 18, 18, 0.98));
+ backdrop-filter: blur(25px);
+ border-radius: 30px;
+ border: 2px solid rgba(220, 20, 60, 0.4);
+ box-shadow: 0 0 80px rgba(220, 20, 60, 0.25);
+ margin-bottom: 40px;
+ position: relative;
+ flex-direction: column;
+ gap: 25px;
+ }
+ .logo-section {
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ width: 100%;
+ background: transparent;
+ }
+ .logo {
+ width: 280px;
+ height: auto;
+ object-fit: contain;
+ background: transparent;
+ image-rendering: crisp-edges;
+ -webkit-user-select: none;
+ -moz-user-select: none;
+ user-select: none;
+ filter: drop-shadow(0 0 15px rgba(220, 20, 60, 0.5));
+ animation: logoFloat 3s ease-in-out infinite;
+ }
+ @keyframes logoFloat {
+ 0%, 100% { transform: translateY(0px); }
+ 50% { transform: translateY(-8px); }
+ }
+ .card {
+ background: linear-gradient(135deg, rgba(18, 18, 18, 0.95), rgba(26, 26, 26, 0.95));
+ backdrop-filter: blur(25px);
+ border-radius: 28px;
+ padding: 40px;
+ margin-bottom: 35px;
+ border: 2px solid rgba(220, 20, 60, 0.25);
+ box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+ position: relative;
+ }
+ .card-header {
+ display: flex;
+ justify-content: space-between;
+ align-items: center;
+ margin-bottom: 25px;
+ }
+ .card-header h2 {
+ display: flex;
+ align-items: center;
+ gap: 15px;
+ font-size: 2em;
+ font-weight: 800;
+ color: var(--accent-primary);
+ font-family: 'Permanent Marker', cursive;
+ }
+ .matchups-grid {
+ display: grid;
+ gap: 20px;
+ }
+ .matchup-card {
+ background: linear-gradient(135deg, rgba(0, 31, 63, 0.8), rgba(0, 38, 66, 0.8));
+ backdrop-filter: blur(20px);
+ border-radius: 15px;
+ padding: 30px;
+ margin-bottom: 20px;
+ border: 2px solid rgba(220, 20, 60, 0.4);
+ transition: all 0.3s ease;
+ }
+ .matchup-card:hover {
+ transform: translateY(-3px);
+ border-color: rgba(220, 20, 60, 0.6);
+ box-shadow: 0 10px 30px rgba(220, 20, 60, 0.2);
+ }
+ .matchup-header {
+ display: flex;
+ justify-content: space-between;
+ align-items: center;
+ margin-bottom: 20px;
+ padding-bottom: 15px;
+ border-bottom: 1px solid rgba(220, 20, 60, 0.3);
+ }
+ .matchup-day {
+ font-family: 'Permanent Marker', cursive;
+ font-size: 1.2em;
+ font-weight: 700;
+ color: var(--accent-primary);
+ letter-spacing: 0.5px;
+ }
+ .matchup-date {
+ font-size: 0.9em;
+ color: var(--text-secondary);
+ font-weight: 600;
+ }
+ .matchup-kickoff {
+ background: rgba(220, 20, 60, 0.2);
+ border: 1px solid rgba(220, 20, 60, 0.4);
+ padding: 8px 16px;
+ border-radius: 20px;
+ font-family: 'Permanent Marker', cursive;
+ font-weight: 700;
+ color: var(--accent-primary);
+ font-size: 1em;
+ }
+ .matchup-teams {
+ display: flex;
+ align-items: center;
+ justify-content: space-between;
+ margin-bottom: 20px;
+ gap: 15px;
+ }
+ .team-section {
+ display: flex;
+ flex-direction: column;
+ align-items: center;
+ gap: 10px;
+ flex: 1;
+ }
+ .team-logo {
+ width: 70px;
+ height: 70px;
+ border-radius: 8px;
+ background: rgba(255, 255, 255, 0.05);
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ border: 2px solid rgba(220, 20, 60, 0.3);
+ overflow: hidden;
+ flex-shrink: 0;
+ }
+ .team-logo img {
+ width: 100%;
+ height: 100%;
+ object-fit: contain;
+ padding: 5px;
+ }
+ .team-name {
+ font-weight:
