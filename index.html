@@ -764,13 +764,16 @@ function runSimulation(awayTeam, homeTeam) {
  `;
 }
 
-async function initializeApp() {
+767
+ () {
  try {
- const [espnGames, oddsGames] = await Promise.all([
- fetchESPNGames(),
- fetchLiveOdds()
- ]);
- 
+//  const [espnGames, oddsGames] = await Promise.all([
+ // fetchESPNGames(),
+ // fetchLiveOdds()
+ // ]);
+
+      const espnGames = [];
+    const oddsGames = [];
  liveGames = espnGames;
  liveOdds = oddsGames;
  
@@ -816,7 +819,8 @@ async function initializeApp() {
  }
 }
 
-document.addEventListener("DOMContentLoaded", initializeApp);
+770
+ ("DOMContentLoaded", initializeApp);
   
 // Tab Switching Function
 function switchTab(event, tabName) {
