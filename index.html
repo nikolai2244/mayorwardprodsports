@@ -491,7 +491,8 @@
  </div>
  </div>
   
-<!-- Tab Navigation -->
+515
+  
 <div class="tab-navigation">
   <button class="tab-button active" onclick="switchTab(event, 'matchups')">Live Matchups</button>
   <button class="tab-button" onclick="switchTab(event, 'simulator')">Game Simulator</button>
@@ -513,16 +514,23 @@
  </div>
 
  </div>
+
+    <!-- Simulator Tab Content -->
+  <div id="simulator-tab" class="tab-content">
+    <div class="card">
+      <div class="card-header">
+        <h2>
+          <div class="logo-badge">
+            <img src="mayorwardprodsports/MW_LOGOnobackground.png" alt="Logo">
+          </div>
+          Game Simulator
+        </h2>
+      </div>
+      <div id="simulator-container" class="matchups-grid"></div>
+    </div>
+  </div>533
   
-<!-- Tab Navigation -->
-<div class="tab-navigation">
-  <button class="tab-button active" onclick="switchTab(event, 'matchups')">Live Matchups</button>
-  <button class="tab-button" onclick="switchTab(event, 'simulator')">Game Simulator</button>
-</div>
-
-<!-- Matchups Tab Content -->
-<div id="matchups-tab" class="tab-content active">
-
+  
 <script>
 // ============================================
 // TEAM DATA & CONFIGURATION
