@@ -465,6 +465,25 @@
  <div class="wave"></div>
  <div class="wave"></div>
  </div>
+         .donation-section {
+  background: linear-gradient(135deg, rgba(220, 20, 60, 0.15), rgba(0, 31, 63, 0.15));
+  border-radius: 15px;
+  padding: 30px;
+  margin: 40px 0;
+  border: 2px solid rgba(220, 20, 60, 0.3);
+  text-align: center;
+}
+.donation-title { font-family: 'Permanent Marker', cursive; font-size: 2em; font-weight: 700; color: var(--accent-primary); margin-bottom: 15px; }
+.donation-text { font-family: 'Indie Flower', cursive; font-size: 1.05em; color: var(--text-secondary); line-height: 1.8; margin-bottom: 25px; }
+.donation-buttons { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; }
+.donation-btn { padding: 12px 30px; border-radius: 10px; font-weight: 800; font-size: 1em; cursor: pointer; transition: all 0.3s ease; text-decoration: none; font-family: 'Permanent Marker', cursive; letter-spacing: 1px; border: none; text-transform: uppercase; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4); display: flex; align-items: center; gap: 8px; }
+.gofundme-btn { background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); color: white; }
+.gofundme-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(220, 20, 60, 0.6); }
+.paypal-btn { background: linear-gradient(135deg, #0070BA, #003087); color: white; }
+.paypal-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0, 112, 186, 0.6); }
+.venmo-btn { background: linear-gradient(135deg, #3D95CE, #2E5F99); color: white; }
+.venmo-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(61, 149, 206, 0.6); }
+
  <span>Loading ESPN Scores...</span>
  </div>
  <div class="data-status-timestamp" id="scoresTimestamp"></div>
@@ -490,10 +509,7 @@
  <img src="mayorwardprodsports/MW_LOGOnobackground.png" alt="MayorWard Logo" class="logo">
  </div>
  </div>
-  
-515
-  
-<div class="tab-navigation">
+  <div class="tab-navigation">
   <button class="tab-button active" onclick="switchTab(event, 'matchups')">Live Matchups</button>
   <button class="tab-button" onclick="switchTab(event, 'simulator')">Game Simulator</button>
 </div>
@@ -512,6 +528,24 @@
  </div>
  <div id="matchups-container" class="matchups-grid"></div>
  </div>
+<!-- Donation Section -->
+<div class="donation-section">
+  <div class="donation-title">Support MayorWard Productions</div>
+  <div class="donation-text">
+    You can learn more about me and help support this project and my Audio Production / Radio imaging venture at:
+  </div>
+  <div class="donation-buttons">
+    <a href="https://gofund.me/6ad61562f" target="_blank" class="donation-btn gofundme-btn">
+      <i class="fas fa-heart"></i> GoFundMe
+    </a>
+    <a href="https://paypal.me/njw2244" target="_blank" class="donation-btn paypal-btn">
+      <i class="fas fa-wallet"></i> PayPal
+    </a>
+    <a href="https://account.venmo.com/u/mayorward" target="_blank" class="donation-btn venmo-btn">
+      <i class="fas fa-mobile-alt"></i> Venmo
+    </a>
+  </div>
+</div>
 
  </div>
 
