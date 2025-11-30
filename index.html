@@ -1,74 +1,413 @@
-// server.js
-const express = require("express");
-const fetch = require("node-fetch");
-const path = require("path");
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>MayorWardProdSports – NFL Simulator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-const app = express();
+    <style>
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background-color: #050509;
+            color: #f5f5f5;
+        }
 
-const PORT = process.env.PORT || 10000; // Render listens on this port internally
-const ODDS_API_KEY = process.env.ODDS_API_KEY || "35ea2bfd08888692d90a60bb91273c16";
+        .page-wrap {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 16px;
+        }
 
-// Serve static files (index.html, etc.) from the root directory
-app.use(express.static(path.join(__dirname)));
+        header {
+            padding: 12px 0 4px 0;
+            border-bottom: 1px solid #333;
+        }
 
-// Simple health check
-app.get("/api/status", (req, res) => {
-  res.json({ ok: true, message: "MayorWardProdSports proxy running" });
-});
+        .site-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            color: #ff4df2;
+        }
 
-// Live odds proxy route
-app.get("/api/odds", async (req, res) => {
+        .subtitle {
+            font-size: 0.9rem;
+            color: #aaa;
+        }
+
+        .status-line {
+            margin: 16px 0 8px 0;
+            font-size: 0.9rem;
+        }
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .game-card {
+            background: radial-gradient(circle at top left, #2a103a 0%, #130918 40%, #050509 100%);
+            border-radius: 10px;
+            padding: 10px 12px;
+            border: 1px solid rgba(255, 77, 242, 0.25);
+            box-shadow: 0 0 18px rgba(255, 77, 242, 0.15);
+        }
+
+        .teams-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .team {
+            color: #ff4d4d;
+        }
+
+        .team.home {
+            color: #b76dff;
+        }
+
+        .vs {
+            font-size: 0.9rem;
+            color: #bbb;
+        }
+
+        .meta-row {
+            font-size: 0.83rem;
+            color: #c0c0c0;
+            margin-bottom: 6px;
+        }
+
+        .odds-row {
+            font-size: 0.85rem;
+            margin-bottom: 6px;
+        }
+
+        .odds-row span {
+            display: block;
+        }
+
+        .scorers-row {
+            font-size: 0.8rem;
+            color: #ddd;
+        }
+
+        .section-title {
+            margin: 24px 0 8px 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #ffc04d;
+        }
+
+        .sim-cta {
+            margin: 12px 0 24px 0;
+            font-size: 0.9rem;
+            color: #ddd;
+        }
+
+        .btn-primary {
+            display: inline-block;
+            padding: 10px 16px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            background: linear-gradient(90deg, #ff4d4d, #ff4df2);
+            color: #050509;
+            font-weight: 600;
+            font-size: 0.92rem;
+            box-shadow: 0 0 14px rgba(255, 77, 242, 0.4);
+        }
+
+        .btn-primary:active {
+            transform: translateY(1px);
+            box-shadow: 0 0 10px rgba(255, 77, 242, 0.3);
+        }
+
+        .footer-note {
+            font-size: 0.78rem;
+            color: #999;
+            margin-top: 24px;
+            border-top: 1px solid #222;
+            padding-top: 10px;
+        }
+
+        .odds-loader {
+            height: 2px;
+            width: 110px;
+            background: linear-gradient(90deg, #ff4d4d, #b76dff);
+            background-size: 200% 100%;
+            animation: scan 1.1s linear infinite;
+            border-radius: 2px;
+            margin-top: 4px;
+        }
+
+        @keyframes scan {
+            0% { background-position: 0% 0%; }
+            100% { background-position: 200% 0%; }
+        }
+    </style>
+</head>
+<body>
+<div class="page-wrap">
+    <header>
+        <div class="site-title">MayorWardProdSports – NFL AI Simulator</div>
+        <div class="subtitle">Live odds when available • Smart fallbacks when they’re not</div>
+    </header>
+
+    <div class="section-title">Live Games & Vegas Lines</div>
+    <div id="odds-status" class="status-line">
+        <span>Connecting to live odds…</span>
+        <div class="odds-loader" id="odds-loader"></div>
+    </div>
+    <div id="games-container" class="games-grid"></div>
+
+    <div class="section-title">Simulation Lab</div>
+    <div class="sim-cta">
+        Click RUN SIMULATION to run AI-powered projections based on current lines and team strength.
+        This is an experimental tool – test it, do not rely on it to bet real money.
+    </div>
+    <button class="btn-primary" id="run-sim-btn">RUN SIMULATION</button>
+    <div id="sim-output" style="margin-top:10px;font-size:0.9rem;color:#eee;"></div>
+
+    <div class="footer-note">
+        Our product is still a baby – expect updates and improvements all season long.
+        Please use the feedback form on the site to report bugs or ideas.
+    </div>
+</div>
+
+<script>
+const teamStrength = {
+  'KC': 1.35, 'GB': 1.28, 'DET': 1.30, 'DAL': 1.22, 'CIN': 1.18,
+  'BAL': 1.25, 'PHI': 1.32, 'SF': 1.31, 'BUF': 1.26, 'LAR': 1.12,
+  'LAC': 1.15, 'MIN': 1.14, 'TB': 1.08, 'HOU': 1.16, 'IND': 0.95,
+  'TEN': 0.98, 'NE': 0.85, 'NYJ': 0.92, 'CHI': 0.88, 'CAR': 0.82,
+  'NO': 0.89, 'MIA': 1.10, 'ARI': 0.97, 'CLE': 1.06, 'PIT': 1.04,
+  'SEA': 1.11, 'NYG': 0.91, 'JAX': 0.87, 'ATL': 0.90, 'LV': 0.86
+};
+
+const fallbackMatchups = [
+  { away: 'GB', home: 'DET', date: 'November 27, 2025', day: 'Thursday', kickoff: '1:00 PM EST' },
+  { away: 'KC', home: 'DAL', date: 'November 27, 2025', day: 'Thursday', kickoff: '4:30 PM EST' },
+  { away: 'CIN', home: 'BAL', date: 'November 27, 2025', day: 'Thursday', kickoff: '8:20 PM EST' },
+  { away: 'CHI', home: 'PHI', date: 'November 28, 2025', day: 'Friday',  kickoff: '3:00 PM EST' },
+  { away: 'JAX', home: 'TEN', date: 'November 28, 2025', day: 'Friday',  kickoff: '5:30 PM EST' },
+  { away: 'LV', home: 'LAC', date: 'November 28, 2025', day: 'Friday',  kickoff: '8:15 PM EST' },
+  { away: 'LAR', home: 'CAR', date: 'November 30, 2025', day: 'Sunday',  kickoff: '10:00 AM EST' },
+  { away: 'SF',  home: 'CLE', date: 'November 30, 2025', day: 'Sunday',  kickoff: '1:00 PM EST' },
+  { away: 'HOU', home: 'IND', date: 'November 30, 2025', day: 'Sunday',  kickoff: '1:00 PM EST' },
+  { away: 'NO',  home: 'MIA', date: 'November 30, 2025', day: 'Sunday',  kickoff: '1:00 PM EST' },
+  { away: 'ATL', home: 'NYJ', date: 'November 30, 2025', day: 'Sunday',  kickoff: '1:00 PM EST' },
+  { away: 'ARI', home: 'TB',  date: 'November 30, 2025', day: 'Sunday',  kickoff: '4:05 PM EST' },
+  { away: 'MIN', home: 'SEA', date: 'November 30, 2025', day: 'Sunday',  kickoff: '4:05 PM EST' },
+  { away: 'BUF', home: 'PIT', date: 'November 30, 2025', day: 'Sunday',  kickoff: '4:05 PM EST' },
+  { away: 'NYG', home: 'NE',  date: 'December 1, 2025',  day: 'Monday',  kickoff: '8:15 PM EST' }
+];
+
+const fallbackTopScorers = {
+  'KC': ['Patrick Mahomes', 'Travis Kelce', 'Rashee Rice'],
+  'GB': ['Jordan Love', 'Romeo Doubs', 'Christian Watson'],
+  'DET': ['Jared Goff', 'Amon-Ra St. Brown', 'Sam LaPorta'],
+  'DAL': ['Dak Prescott', 'CeeDee Lamb', 'Tony Pollard'],
+  'CIN': ['Joe Burrow', 'Ja\'Marr Chase', 'Tee Higgins'],
+  'BAL': ['Lamar Jackson', 'Mark Andrews', 'Zay Flowers'],
+  'PHI': ['Jalen Hurts', 'A.J. Brown', 'DeVonta Smith'],
+  'SF':  ['Brock Purdy', 'Deebo Samuel', 'Christian McCaffrey'],
+  'BUF': ['Josh Allen', 'Stefon Diggs', 'Dalton Kincaid'],
+  'LAR': ['Matthew Stafford', 'Cooper Kupp', 'Puka Nacua'],
+  'LAC': ['Justin Herbert', 'Keenan Allen', 'Josh Palmer'],
+  'MIN': ['Kirk Cousins', 'Justin Jefferson', 'Jordan Addison'],
+  'TB':  ['Baker Mayfield', 'Mike Evans', 'Chris Godwin'],
+  'HOU': ['C.J. Stroud', 'Nico Collins', 'Tank Dell'],
+  'IND': ['Anthony Richardson', 'Michael Pittman Jr.', 'Jonathan Taylor'],
+  'TEN': ['Will Levis', 'DeAndre Hopkins', 'Derrick Henry'],
+  'NE':  ['Mac Jones', 'Kendrick Bourne', 'Rhamondre Stevenson'],
+  'NYJ': ['Aaron Rodgers', 'Garrett Wilson', 'Breece Hall'],
+  'CHI': ['Justin Fields', 'D.J. Moore', 'Cole Kmet'],
+  'CAR': ['Bryce Young', 'Adam Thielen', 'Jonathan Mingo'],
+  'NO':  ['Derek Carr', 'Chris Olave', 'Alvin Kamara'],
+  'MIA': ['Tua Tagovailoa', 'Tyreek Hill', 'Jaylen Waddle'],
+  'ARI': ['Kyler Murray', 'Marquise Brown', 'James Conner'],
+  'CLE': ['Deshaun Watson', 'Amari Cooper', 'Nick Chubb'],
+  'PIT': ['Kenny Pickett', 'George Pickens', 'Najee Harris'],
+  'SEA': ['Geno Smith', 'DK Metcalf', 'Tyler Lockett'],
+  'NYG': ['Daniel Jones', 'Saquon Barkley', 'Darren Waller'],
+  'JAX': ['Trevor Lawrence', 'Calvin Ridley', 'Travis Etienne'],
+  'ATL': ['Desmond Ridder', 'Drake London', 'Bijan Robinson'],
+  'LV':  ['Jimmy Garoppolo', 'Davante Adams', 'Josh Jacobs']
+};
+
+let liveMatchups = [];
+let liveOddsData = [];
+let hasLiveGames = false;
+let lastOddsUpdate = null;
+
+function formatDateTime(dateStr, timeStr) {
+  return `${dateStr} • ${timeStr}`;
+}
+
+function updateOddsStatus(message, ok = true) {
+  const wrapper = document.getElementById("odds-status");
+  const loader = document.getElementById("odds-loader");
+  if (!wrapper) return;
+  const span = wrapper.querySelector("span");
+  if (span) span.textContent = message;
+  wrapper.style.color = ok ? "#7CFC00" : "#ff4d4d";
+  if (loader) {
+    loader.style.display = ok && message.toLowerCase().includes("connecting")
+      ? "block"
+      : "none";
+  }
+}
+
+function renderMatchups() {
+  const container = document.getElementById("games-container");
+  if (!container) return;
+
+  container.innerHTML = "";
+  const data = liveMatchups.length ? liveMatchups : fallbackMatchups;
+
+  data.forEach(game => {
+    const card = document.createElement("div");
+    card.className = "game-card";
+
+    const away = game.away;
+    const home = game.home;
+
+    const odds = liveOddsData.find(
+      g => g.away_team === away && g.home_team === home
+    );
+
+    const scorerListAway = (fallbackTopScorers[away] || []).join(", ");
+    const scorerListHome = (fallbackTopScorers[home] || []).join(", ");
+
+    const homeSpread = odds
+      ? (odds.bookmakers?.[0]?.markets?.find(m => m.key === "spreads")
+           ?.outcomes?.find(o => o.name === odds.home_team)?.point ?? "N/A")
+      : null;
+
+    const totalPoints = odds
+      ? (odds.bookmakers?.[0]?.markets?.find(m => m.key === "totals")
+           ?.outcomes?.[0]?.point ?? "N/A")
+      : null;
+
+    card.innerHTML = `
+      <div class="teams-row">
+        <span class="team away">${away}</span>
+        <span class="vs">at</span>
+        <span class="team home">${home}</span>
+      </div>
+      <div class="meta-row">
+        ${formatDateTime(game.date || "Today", game.kickoff || "TBD")}
+      </div>
+      <div class="odds-row">
+        ${
+          odds
+            ? `
+          <span>Home spread: ${homeSpread}</span>
+          <span>Total: ${totalPoints}</span>
+        `
+            : `<span>Live odds unavailable – using projected lines.</span>`
+        }
+      </div>
+      <div class="scorers-row">
+        <strong>${away} key scorers:</strong> ${scorerListAway || "TBD"}<br>
+        <strong>${home} key scorers:</strong> ${scorerListHome || "TBD"}
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function useFallbackMatchups(reasonText) {
+  liveMatchups = fallbackMatchups.slice();
+  hasLiveGames = true;
+  updateOddsStatus(
+    reasonText || "Using scheduled matchups – live odds unavailable.",
+    false
+  );
+  renderMatchups();
+}
+
+async function fetchLiveOdds() {
+  updateOddsStatus("Connecting to live odds…", true);
   try {
-    const url =
-      "https://api.the-odds-api.com/v4/sports/americanfootball_nfl/odds?" +
-      new URLSearchParams({
-        apiKey: ODDS_API_KEY,
-        regions: "us",
-        markets: "h2h,spreads,totals",
-        oddsFormat: "american"
-      }).toString();
-
-    const apiRes = await fetch(url);
-    const json = await apiRes.json();
-
-    if (!apiRes.ok) {
-      console.error("The Odds API error:", apiRes.status, json);
-      return res.status(apiRes.status).json({
-        error: true,
-        status: apiRes.status,
-        message: json.message || "The Odds API request failed"
-      });
+    const res = await fetch("/api/odds");
+    if (!res.ok) {
+      const text = await res.text();
+      console.error("ODDS API HTTP ERROR:", res.status, text);
+      useFallbackMatchups("Live odds service error – using scheduled matchups.");
+      return;
     }
 
-    return res.json({ error: false, games: json });
-  } catch (err) {
-    console.error("Proxy /api/odds error:", err);
-    return res.status(500).json({
-      error: true,
-      status: 500,
-      message: "Internal server error fetching odds"
-    });
+    const data = await res.json();
+    if (data.error || !Array.isArray(data.games)) {
+      console.error("ODDS API DATA ERROR:", data);
+      useFallbackMatchups("Live odds unavailable – using scheduled matchups.");
+      return;
+    }
+
+    liveOddsData = data.games;
+    liveMatchups = data.games.map(g => ({
+      away: g.away_team,
+      home: g.home_team,
+      date: "Today",
+      day: "",
+      kickoff: "TBD"
+    }));
+
+    hasLiveGames = !!liveMatchups.length;
+    lastOddsUpdate = new Date();
+
+    updateOddsStatus("Live odds connected.", true);
+    renderMatchups();
+  } catch (error) {
+    console.error("ODDS FETCH ERROR:", error);
+    useFallbackMatchups("Live odds connection failed – using scheduled matchups.");
   }
-});
+}
 
-// Fallback weather example (optional)
-app.get("/api/weather", async (req, res) => {
-  const city = req.query.city || "Detroit";
-  res.json({
-    error: false,
-    city,
-    tempF: 72,
-    conditions: "Partly Cloudy",
-    windMph: 8
+function runSimpleSimulation() {
+  const outputEl = document.getElementById("sim-output");
+  if (!outputEl) return;
+
+  const games = liveMatchups.length ? liveMatchups : fallbackMatchups;
+  if (!games.length) {
+    outputEl.textContent = "No games available to simulate right now.";
+    return;
+  }
+
+  const simulated = games.map(game => {
+    const awayStrength = teamStrength[game.away] || 1.0;
+    const homeStrength = teamStrength[game.home] || 1.0;
+
+    const strengthDiff = homeStrength - awayStrength;
+    const noise = (Math.random() - 0.5) * 0.6;
+    const score = strengthDiff + noise;
+
+    const winner = score >= 0 ? game.home : game.away;
+    return `${game.away} at ${game.home} → projected edge: ${winner}`;
   });
-});
 
-// Catch-all: always send index.html for other routes
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "index.html"));
-});
+  outputEl.innerHTML = simulated.join("<br>");
+}
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`MayorWardProdSports proxy listening on http://localhost:${PORT}`);
-});
+async function initializeApp() {
+  renderMatchups();
+  await fetchLiveOdds();
+
+  const simBtn = document.getElementById("run-sim-btn");
+  if (simBtn) {
+    simBtn.addEventListener("click", runSimpleSimulation);
+  }
+}
+
+document.addEventListener("DOMContentLoaded", initializeApp);
+</script>
+
+</body>
+</html>
