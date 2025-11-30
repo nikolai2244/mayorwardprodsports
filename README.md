@@ -14,6 +14,8 @@ NFL AI Simulator with live odds integration.
 
 Deployed on Vercel: [mayorwardprodsports.vercel.app](https://mayorwardprodsports.vercel.app)
 
+<!-- Trigger deployment -->
+
 ## Tech Stack
 
 - Frontend: HTML, CSS, JavaScript
