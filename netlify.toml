@@ -3,7 +3,7 @@
   publish = "."
 
 [build.environment]
-  ODDS_API_KEY = ""
+  ODDS_API_KEY = "35ea2bfd08888692d90a60bb91273c16"
 
 [[redirects]]
   from = "/api/*"
