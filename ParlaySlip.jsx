@@ -1,0 +1,1 @@
+export default function ParlaySlip(){return <div>Parlay Slip</div>};

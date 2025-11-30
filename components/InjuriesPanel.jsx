@@ -1,0 +1,1 @@
+export default function InjuriesPanel(){return <div>Injuries Panel</div>};

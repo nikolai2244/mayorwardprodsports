@@ -1,0 +1,1 @@
+export default function SignupCard(){return <div>Signup Card</div>};

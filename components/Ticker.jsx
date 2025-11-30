@@ -1,0 +1,1 @@
+export default function Ticker(){return <div>Ticker Component</div>};

@@ -1,0 +1,1 @@
+export default function WeatherBadge(){return <div>Weather Badge</div>};

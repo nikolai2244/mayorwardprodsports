@@ -1,0 +1,1 @@
+export default function Home(){return <div>MW LAB Skeleton Ready</div>;}
