@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>MayorWard ProdSports | Elite NFL Simulation Platform</title>
+ <link href="https://fonts.googleapis.com/css2?family=Indie+Flower&family=Permanent+Marker&family=Caveat:wght@400;700&family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+ <style>
+ :root {
+ --mw-red: #DC143C;
+ --mw-black: #000000;
+ --mw-white: #FFFFFF;
+ --mw-navy: #001F3F;
+ --mw-red-glow: rgba(220, 20, 60, 0.6);
+ --bg-primary: #000000;
+ --bg-secondary: #0a0a0a;
+ --bg-card: #121212;
+ --bg-elevated: #1a1a1a;
+ --accent-primary: #DC143C;
+ --accent-secondary: #FF1744;
+ --accent-success: #00FF87;
+ --accent-warning: #FFD700;
+ --text-primary: #FFFFFF;
+ --text-secondary: #CCCCCC;
+ --text-muted: #888888;
+ --border-color: rgba(220, 20, 60, 0.3);
+ }
+ * {
+ margin: 0;
+ padding: 0;
+ box-sizing: border-box;
+ }
+ body {
+ font-family: 'Inter', system-ui, -apple-system, sans-serif;
+ background: #000000;
+ color: var(--text-primary);
+ min-height: 100vh;
+ overflow-x: hidden;
+ position: relative;
+ }
+ .bg-grid {
+ position: fixed;
+ top: 0;
+ left: 0;
+ width: 100%;
+ height: 100%;
+ background: 
+ radial-gradient(ellipse at 30% 40%, rgba(220, 20, 60, 0.12) 0%, transparent 50%),
+ radial-gradient(ellipse at 70% 60%, rgba(0, 31, 63, 0.08) 0%, transparent 50%);
+ z-index: 0;
+ pointer-events: none;
+ animation: backgroundPulse 25s ease-in-out infinite;
+ }
+ @keyframes backgroundPulse {
+ 0%, 100% { opacity: 0.5; }
+ 50% { opacity: 0.8; }
+ }
+ .container {
+ position: relative;
+ z-index: 1;
+ max-width: 1600px;
+ margin: 0 auto;
+ padding: 20px;
+ }
+ .beta-disclaimer {
+ background: linear-gradient(135deg, rgba(255, 69, 0, 0.25), rgba(255, 215, 0, 0.15));
+ border: 2px solid rgba(255, 215, 0, 0.5);
+ border-radius: 15px;
+ padding: 25px;
+ margin-bottom: 25px;
+ box-shadow: 0 0 30px rgba(255, 215, 0, 0.2);
+ text-align: center;
+ }
+ .beta-disclaimer-title {
+ font-family: 'Permanent Marker', cursive;
+ font-size: 1.8em;
+ font-weight: 700;
+ color: var(--accent-warning);
+ margin-bottom: 12px;
+ letter-spacing: 1px;
+ }
+ .beta-disclaimer-text {
+ font-family: 'Indie Flower', cursive;
+ font-size: 1em;
+ line-height: 1.7;
+ color: var(--text-secondary);
+ margin-bottom: 10px;
+ }
+ .beta-disclaimer-text strong {
+ color: var(--accent-secondary);
+ font-weight: 700;
+ }
+ .logo-badge {
+ width: 40px;
+ height: 40px;
+ border-radius: 50%;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ background: linear-gradient(135deg, rgba(220, 20, 60, 0.2), rgba(0, 31, 63, 0.2));
+ border: 2px solid rgba(220, 20, 60, 0.5);
+ box-shadow: 0 0 15px rgba(220, 20, 60, 0.3);
+ flex-shrink: 0;
+ }
+ .logo-badge img {
+ width: 90%;
+ height: 90%;
+ object-fit: contain;
+ }
+ .welcome-banner {
+ background: linear-gradient(135deg, rgba(220, 20, 60, 0.25), rgba(0, 31, 63, 0.25));
+ backdrop-filter: blur(20px);
+ border: 2px solid rgba(220, 20, 60, 0.5);
+ border-radius: 15px;
+ padding: 30px;
+ margin-bottom: 30px;
+ box-shadow: 0 0 40px rgba(220, 20, 60, 0.2);
+ text-align: center;
+ }
+ .welcome-banner h1 {
+ font-family: 'Permanent Marker', cursive;
+ font-size: 2.8em;
+ font-weight: 700;
+ color: var(--accent-primary);
+ margin-bottom: 15px;
+ text-shadow: 0 0 10px rgba(220, 20, 60, 0.6);
+ letter-spacing: 2px;
+ }
+ .welcome-banner p {
+ font-family: 'Indie Flower', cursive;
+ font-size: 1.05em;
+ line-height: 1.8;
+ color: var(--text-secondary);
+ }
+ .data-status-container {
+ display: flex;
+ gap: 15px;
+ margin-top: 20px;
+ flex-wrap: wrap;
+ justify-content: center;
+ }
+ .data-status {
+ background: rgba(0, 255, 135, 0.1);
+ border: 1px solid rgba(0, 255, 135, 0.3);
+ border-radius: 8px;
+ padding: 12px 20px;
+ text-align: center;
+ font-size: 0.9em;
+ color: var(--accent-success);
+ font-weight: 600;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ gap: 8px;
+ flex: 1;
+ min-width: 250px;
+ flex-direction: column;
+ }
+ .radio-waves {
+ display: flex;
+ gap: 4px;
+ align-items: center;
+ height: 20px;
+ }
+ .wave {
+ width: 3px;
+ background: var(--accent-success);
+ border-radius: 2px;
+ animation: wave 1.2s ease-in-out infinite;
+ }
+ .wave:nth-child(1) { animation-delay: 0s; }
+ .wave:nth-child(2) { animation-delay: 0.2s; }
+ .wave:nth-child(3) { animation-delay: 0.4s; }
+ .wave:nth-child(4) { animation-delay: 0.6s; }
+ .wave:nth-child(5) { animation-delay: 0.8s; }
+ @keyframes wave {
+ 0%, 100% { height: 5px; }
+ 50% { height: 20px; }
+ }
+ .data-status.loading {
+ background: rgba(255, 215, 0, 0.1);
+ border-color: rgba(255, 215, 0, 0.3);
+ color: var(--accent-warning);
+ }
+ .data-status.error {
+ background: rgba(255, 69, 0, 0.1);
+ border-color: rgba(255, 69, 0, 0.3);
+ color: var(--accent-secondary);
+ }
+ .data-status.success {
+ background: rgba(0, 255, 135, 0.1);
+ border-color: rgba(0, 255, 135, 0.3);
+ color: var(--accent-success);
+ }
+ .data-status-timestamp {
+ font-size: 0.8em;
+ color: var(--text-muted);
+ margin-top: 4px;
+ }
+ .data-status-message {
+ font-size: 0.9em;
+ font-weight: 600;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ gap: 8px;
+ }
+ .header {
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ padding: 35px 45px;
+ background: linear-gradient(135deg, rgba(10, 10, 10, 0.98), rgba(18, 18, 18, 0.98));
+ backdrop-filter: blur(25px);
+ border-radius: 30px;
+ border: 2px solid rgba(220, 20, 60, 0.4);
+ box-shadow: 0 0 80px rgba(220, 20, 60, 0.25);
+ margin-bottom: 40px;
+ position: relative;
+ flex-direction: column;
+ gap: 25px;
+ }
+ .logo-section {
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ width: 100%;
+ background: transparent;
+ }
+ .logo {
+ width: 280px;
+ height: auto;
+ object-fit: contain;
+ background: transparent;
+ image-rendering: crisp-edges;
+ filter: drop-shadow(0 0 15px rgba(220, 20, 60, 0.5));
+ animation: logoFloat 3s ease-in-out infinite;
+ }
+ @keyframes logoFloat {
+ 0%, 100% { transform: translateY(0px); }
+ 50% { transform: translateY(-8px); }
+ }
+ .card {
+ background: linear-gradient(135deg, rgba(18, 18, 18, 0.95), rgba(26, 26, 26, 0.95));
+ backdrop-filter: blur(25px);
+ border-radius: 28px;
+ padding: 40px;
+ margin-bottom: 35px;
+ border: 2px solid rgba(220, 20, 60, 0.25);
+ box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+ position: relative;
+ }
+ .card-header {
+ display: flex;
+ justify-content: space-between;
+ align-items: center;
+ margin-bottom: 25px;
+ }
+ .card-header h2 {
+ display: flex;
+ align-items: center;
+ gap: 15px;
+ font-size: 2em;
+ font-weight: 800;
+ color: var(--accent-primary);
+ font-family: 'Permanent Marker', cursive;
+ }
+ .matchups-grid {
+ display: grid;
+ gap: 20px;
+ }
+ .matchup-card {
+ background: linear-gradient(135deg, rgba(0, 31, 63, 0.8), rgba(0, 38, 66, 0.8));
+ backdrop-filter: blur(20px);
+ border-radius: 15px;
+ padding: 30px;
+ margin-bottom: 20px;
+ border: 2px solid rgba(220, 20, 60, 0.4);
+ transition: all 0.3s ease;
+ }
+ .matchup-card:hover {
+ transform: translateY(-3px);
+ border-color: rgba(220, 20, 60, 0.6);
+ box-shadow: 0 10px 30px rgba(220, 20, 60, 0.2);
+ }
+ .matchup-header {
+ display: flex;
+ justify-content: space-between;
+ align-items: center;
+ margin-bottom: 20px;
+ padding-bottom: 15px;
+ border-bottom: 1px solid rgba(220, 20, 60, 0.3);
+ }
+ .matchup-day {
+ font-family: 'Permanent Marker', cursive;
+ font-size: 1.2em;
+ font-weight: 700;
+ color: var(--accent-primary);
+ letter-spacing: 0.5px;
+ }
+ .matchup-date {
+ font-size: 0.9em;
+ color: var(--text-secondary);
+ font-weight: 600;
+ }
+ .matchup-kickoff {
+ background: rgba(220, 20, 60, 0.2);
+ border: 1px solid rgba(220, 20, 60, 0.4);
+ padding: 8px 16px;
+ border-radius: 20px;
+ font-family: 'Permanent Marker', cursive;
+ font-weight: 700;
+ color: var(--accent-primary);
+ font-size: 1em;
+ }
+ .matchup-teams {
+ display: flex;
+ align-items: center;
+ justify-content: space-between;
+ margin-bottom: 20px;
+ gap: 15px;
+ }
+ .team-section {
+ display: flex;
+ flex-direction: column;
+ align-items: center;
+ gap: 10px;
+ flex: 1;
+ }
+ .team-logo {
+ width: 70px;
+ height: 70px;
+ border-radius: 8px;
+ background: rgba(255, 255, 255, 0.05);
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ border: 2px solid rgba(220, 20, 60, 0.3);
+ overflow: hidden;
+ }
+ .team-logo img {
+ width: 100%;
+ height: 100%;
+ object-fit: contain;
+ padding: 5px;
+ }
+ .team-name {
+ font-weight: 700;
+ font-size: 1em;
+ color: var(--text-primary);
+ text-align: center;
+ }
+ .vs-badge {
+ color: var(--accent-primary);
+ font-weight: 800;
+ font-size: 1.2em;
+ padding: 0 10px;
+ }
+ .spread-badge {
+ background: rgba(255, 215, 0, 0
+.2);
+ border: 2px solid var(--accent-warning);
+ color: var(--accent-warning);
+ padding: 8px 16px;
+ border-radius: 20px;
+ font-weight: 700;
+ font-size: 0.9em;
+ text-align: center;
+ margin-top: 10px;
+ font-family: 'Permanent Marker', cursive;
+ }
+ .simulate-btn {
+ width: 100%;
+ padding: 16px 40px;
+ background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+ color: white;
+ border: none;
+ border-radius: 10px;
+ font-weight: 700;
+ font-size: 1.1em;
+ cursor: pointer;
+ transition: all 0.3s ease;
+ box-shadow: 0 4px 15px rgba(220, 20, 60, 0.4);
+ font-family: 'Permanent Marker', cursive;
+ letter-spacing: 1px;
+ text-transform: uppercase;
+ }
+ .simulate-btn:hover {
+ transform: translateY(-2px);
+ box-shadow: 0 6px 20px rgba(220, 20, 60, 0.6);
+ }
+ .simulate-btn:disabled {
+ opacity: 0.5;
+ cursor: not-allowed;
+ transform: none;
+ }
+   
+/* Tab Navigation Styles */
+.tab-navigation {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 30px;
+  border-bottom: 2px solid rgba(220, 20, 60, 0.3);
+  padding-bottom: 10px;
+}
+.tab-button {
+  background: rgba(18, 18, 18, 0.95);
+  border: 2px solid rgba(220, 20, 60, 0.4);
+  color: var(--text-secondary);
+  padding: 12px 30px;
+  border-radius: 10px 10px 0 0;
+  font-family: 'Permanent Marker', cursive;
+  font-size: 1.1em;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-bottom: none;
+}
+.tab-button:hover {
+  background: rgba(220, 20, 60, 0.2);
+  color: var(--accent-primary);
+}
+.tab-button.active {
+  background: linear-gradient(135deg, rgba(220, 20, 60, 0.3), rgba(0, 31, 63, 0.3));
+  color: var(--accent-primary);
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 20px rgba(220, 20, 60, 0.4);
+}
+.tab-content {
+  display: none;
+}
+.tab-content.active {
+  display: block;
+}
+
+ @media (max-width: 768px) {
+ .header { flex-direction: column; gap: 15px; padding: 20px; }
+ .matchup-teams { flex-direction: column; }
+ }
+ </style>
+</head>
+<body>
+ <div class="bg-grid"></div>
+ 
+ <div class="container">
+ <div class="beta-disclaimer">
+ <div class="beta-disclaimer-title">
+ <i class="fas fa-exclamation-triangle"></i> FIRST BETA MODE - DISCLAIMER
+ </div>
+ <div class="beta-disclaimer-text">
+ This platform is in its <strong>VERY FIRST BETA phase</strong>. While our models show promise, <strong>DO NOT use this simulator for live betting decisions</strong> without careful verification. Always double-check simulation results against current data. <strong>No prediction or simulation is guaranteed</strong> - use at your own risk.
+ </div>
+ </div>
+
+ <div class="welcome-banner">
+ <h1>Welcome to v1_0000001</h1>
+ <p>Our product is still a baby so please bear with us. Test this and do NOT rely on the simulator for your bets at this time. Please use the feedback form to let me know of any bugs or suggestions. - The Mayor</p>
+ <div class="data-status-container">
+ <div id="scoresStatus" class="data-status loading">
+ <div class="data-status-message">
+ <div class="radio-waves">
+ <div class="wave"></div>
+ <div class="wave"></div>
+ <div class="wave"></div>
+ <div class="wave"></div>
+ <div class="wave"></div>
+ </div>
+ <span>Loading ESPN Scores...</span>
+ </div>
+ <div class="data-status-timestamp" id="scoresTimestamp"></div>
+ </div>
+ <div id="oddsStatus" class="data-status loading">
+ <div class="data-status-message">
+ <div class="radio-waves">
+ <div class="wave"></div>
+ <div class="wave"></div>
+ <div class="wave"></div>
+ <div class="wave"></div>
+ <div class="wave"></div>
+ </div>
+ <span id="oddsStatusText">Loading Live Odds...</span>
+ </div>
+ <div class="data-status-timestamp" id="oddsTimestamp"></div>
+ </div>
+ </div>
+ </div>
+
+ <div class="header">
+ <div class="logo-section">
+ <img src="mayorwardprodsports/MW_LOGOnobackground.png" alt="MayorWard Logo" class="logo">
+ </div>
+ </div>
+  
+<!-- Tab Navigation -->
+<div class="tab-navigation">
+  <button class="tab-button active" onclick="switchTab(event, 'matchups')">Live Matchups</button>
+  <button class="tab-button" onclick="switchTab(event, 'simulator')">Game Simulator</button>
+</div>
+
+<!-- Matchups Tab Content -->
+<div id="matchups-tab" class="tab-content active">
+
+ <div class="card">
+ <div class="card-header">
+ <h2>
+ <div class="logo-badge">
+ <img src="mayorwardprodsports/MW_LOGOnobackground.png" alt="Logo">
+ </div>
+ Live Games & Predictions
+ </h2>
+ </div>
+ <div id="matchups-container" class="matchups-grid"></div>
+ </div>
+
+ </div>
+  
+<!-- Tab Navigation -->
+<div class="tab-navigation">
+  <button class="tab-button active" onclick="switchTab(event, 'matchups')">Live Matchups</button>
+  <button class="tab-button" onclick="switchTab(event, 'simulator')">Game Simulator</button>
+</div>
+
+<!-- Matchups Tab Content -->
+<div id="matchups-tab" class="tab-content active">
+
+<script>
+// ============================================
+// TEAM DATA & CONFIGURATION
+// ============================================
+
+const teamStrength = {
+ 'KC': 1.35, 'GB': 1.28, 'DET': 1.30, 'DAL': 1.22, 'CIN': 1.18,
+ 'BAL': 1.25, 'PHI': 1.32, 'SF': 1.31, 'BUF': 1.26, 'LAR': 1.12,
+ 'LAC': 1.15, 'MIN': 1.14, 'TB': 1.08, 'HOU': 1.16, 'IND': 0.95,
+ 'TEN': 0.98, 'NE': 0.85, 'NYJ': 0.92, 'CHI': 0.88, 'CAR': 0.82,
+ 'NO': 0.89, 'MIA': 1.10, 'ARI': 0.97, 'CLE': 1.06, 'PIT': 1.04,
+ 'SEA': 1.11, 'NYG': 0.91, 'JAX': 0.87, 'ATL': 0.90, 'LV': 0.86
+};
+
+const teams = {
+ 'KC': { name: 'Kansas City Chiefs', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/kc.png' },
+ 'GB': { name: 'Green Bay Packers', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/gb.png' },
+ 'DET': { name: 'Detroit Lions', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/det.png' },
+ 'DAL': { name: 'Dallas Cowboys', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/dal.png' },
+ 'CIN': { name: 'Cincinnati Bengals', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/cin.png' },
+ 'BAL': { name: 'Baltimore Ravens', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/bal.png' },
+ 'CHI': { name: 'Chicago Bears', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/chi.png' },
+ 'PHI': { name: 'Philadelphia Eagles', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/phi.png' },
+ 'JAX': { name: 'Jacksonville Jaguars', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/jax.png' },
+ 'TEN': { name: 'Tennessee Titans', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/ten.png' },
+ 'LV': { name: 'Las Vegas Raiders', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/lv.png' },
+ 'LAC': { name: 'Los Angeles Chargers', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/lac.png' },
+ 'LAR': { name: 'Los Angeles Rams', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/lar.png' },
+ 'CAR': { name: 'Carolina Panthers', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/car.png' },
+ 'SF': { name: 'San Francisco 49ers', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/sf.png' },
+ 'CLE': { name: 'Cleveland Browns', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/cle.png' },
+ 'HOU': { name: 'Houston Texans', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/hou.png' },
+ 'IND': { name: 'Indianapolis Colts', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/ind.png' },
+ 'NO': { name: 'New Orleans Saints', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/no.png' },
+ 'MIA': { name: 'Miami Dolphins', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/mia.png' },
+ 'ATL': { name: 'Atlanta Falcons', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/atl.png' },
+ 'NYJ': { name: 'New York Jets', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/nyj.png' },
+ 'ARI': { name: 'Arizona Cardinals', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/ari.png' },
+ 'TB': { name: 'Tampa Bay Buccaneers', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/tb.png' },
+ 'MIN': { name: 'Minnesota Vikings', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/min.png' },
+ 'SEA': { name: 'Seattle Seahawks', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/sea.png' },
+ 'BUF': { name: 'Buffalo Bills', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/buf.png' },
+ 'PIT': { name: 'Pittsburgh Steelers', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/pit.png' },
+ 'NYG': { name: 'New York Giants', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/nyg.png' },
+ 'NE': { name: 'New England Patriots', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/ne.png' }
+};
+
+let liveGames = [];
+let liveOdds = [];
+
+// ============================================
+// API FETCHING FUNCTIONS
+// ============================================
+
+function formatDateTime(date) {
+ const options = { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+ return date.toLocaleDateString('en-US', options);
+}
+
+function updateOddsStatus(connected) {
+ const oddsDiv = document.getElementById('oddsStatus');
+ const statusText = document.getElementById('oddsStatusText');
+ const timestamp = document.getElementById('oddsTimestamp');
+ 
+ if (connected) {
+ oddsDiv.className = 'data-status success';
+ statusText.textContent = 'Live Odds Connected';
+ timestamp.innerHTML = `Updated: ${formatDateTime(new Date())}`;
+ } else {
+ oddsDiv.className = 'data-status error';
+ statusText.textContent = 'Live Odds Unavailable';
+ timestamp.innerHTML = 'Using fallback data';
+ }
+}
+
+function updateScoresStatus(connected) {
+ const scoresDiv = document.getElementById('scoresStatus');
+ const timestamp = document.getElementById('scoresTimestamp');
+ 
+ if (connected) {
+ scoresDiv.className = 'data-status success';
+ scoresDiv.querySelector('.data-status-message span').textContent = 'ESPN Scores Live';
+ timestamp.innerHTML = `Updated: ${formatDateTime(new Date())}`;
+ } else {
+ scoresDiv.className = 'data-status error';
+ scoresDiv.querySelector('.data-status-message span').textContent = 'ESPN Connection Error';
+ timestamp.innerHTML = 'Using fallback data';
+ }
+}
+
+async function fetchESPNGames() {
+ try {
+ const res = await fetch("/api/espn-games");
+ const data = await res.json();
+ 
+ if (data.error || !Array.isArray(data.games)) {
+ console.error("ESPN API error:", data);
+ updateScoresStatus(false);
+ return [];
+ }
+ 
+ updateScoresStatus(true);
+ return data.games.map(event => {
+ const competition = event.competitions?.[0];
+ const homeTeam = competition?.competitors?.find(c => c.homeAway === 'home');
+ const awayTeam = competition?.competitors?.find(c => c.homeAway === 'away');
+ 
+ return {
+ away: awayTeam?.team?.abbreviation || 'TBD',
+ home: homeTeam?.team?.abbreviation || 'TBD',
+ awayScore: awayTeam?.score || 0,
+ homeScore: homeTeam?.score || 0,
+ status: event.status?.type?.description || 'Scheduled',
+ date: new Date(event.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+ time: new Date(event.date).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+ };
+ });
+ } catch (error) {
+ console.error("ESPN fetch error:", error);
+ updateScoresStatus(false);
+ return [];
+ }
+}
+
+async function fetchLiveOdds() {
+ try {
+ const res = await fetch("/api/odds");
+ const data = await res.json();
+ 
+ if (data.error || !Array.isArray(data.games)) {
+ console.error("Odds API error:", data);
+ updateOddsStatus(false);
+ return [];
+ }
+ 
+ updateOddsStatus(true);
+ return data.games;
+ } catch (error) {
+ console.error("Odds fetch error:", error);
+ updateOddsStatus(false);
+ return [];
+ }
+}
+
+function renderGames(games) {
+ const container = document.getElementById('matchups-container');
+ if (!container) return;
+ 
+ container.innerHTML = '';
+ 
+ if (!games || games.length === 0) {
+ container.innerHTML = '<p style="text-align:center;color:var(--text-muted);">No games available at this time.</p>';
+ return;
+ }
+ 
+ games.forEach(game => {
+ const home = teams[game.home];
+ const away = teams[game.away];
+ 
+ if (!home || !away) return;
+ 
+ const odds = liveOdds.find(o
+ => 
+ o.away_team === game.away && o.home_team === game.home
+ );
+ 
+ const spread = odds?.bookmakers?.[0]?.markets?.find(m => m.key === 'spreads')
+ ?.outcomes?.find(o => o.name === odds.home_team)?.point || 'N/A';
+ 
+ const card = document.createElement('div');
+ card.className = 'matchup-card';
+ card.innerHTML = `
+ <div class="matchup-header">
+ <div>
+ <div class="matchup-day">${game.status || 'Scheduled'}</div>
+ <div class="matchup-date">${game.date || 'TBD'}</div>
+ </div>
+ <div class="matchup-kickoff">${game.time || 'TBD'}</div>
+ </div>
+ <div class="matchup-teams">
+ <div class="team-section">
+ <div class="team-logo">
+ <img src="${away.logo}" alt="${away.name}">
+ </div>
+ <div class="team-name">${away.name}</div>
+ ${game.awayScore > 0 ? `<div style="font-size:2em;color:var(--accent-success);font-weight:900;">${game.awayScore}</div>` : ''}
+ </div>
+ <div class="vs-badge">@</div>
+ <div class="team-section">
+ <div class="team-logo">
+ <img src="${home.logo}" alt="${home.name}">
+ </div>
+ <div class="team-name">${home.name}</div>
+ ${game.homeScore > 0 ? `<div style="font-size:2em;color:var(--accent-success);font-weight:900;">${game.homeScore}</div>` : ''}
+ ${spread !== 'N/A' ? `<div class="spread-badge">Spread: ${spread > 0 ? '+' : ''}${spread}</div>` : ''}
+ </div>
+ </div>
+ `;
+ container.appendChild(card);
+ });
+}
+
+function runSimulation(awayTeam, homeTeam) {
+ const resultDiv = document.getElementById(`result-${awayTeam}-${homeTeam}`);
+ if (!resultDiv) return;
+ 
+ const awayStrength = teamStrength[awayTeam] || 1.0;
+ const homeStrength = teamStrength[homeTeam] || 1.0;
+ 
+ const homeBase = 21 + (homeStrength - 1) * 10;
+ const awayBase = 21 + (awayStrength - 1) * 10;
+ 
+ const homeScore = Math.max(0, Math.round(homeBase + (Math.random() * 14 - 7)));
+ const awayScore = Math.max(0, Math.round(awayBase + (Math.random() * 14 - 7)));
+ 
+ const winner = homeScore > awayScore ? homeTeam : awayTeam;
+ const winnerName = teams[winner]?.name || winner;
+ 
+ resultDiv.innerHTML = `
+ <div style="background:rgba(0,255,135,0.1);border:2px solid var(--accent-success);border-radius:10px;padding:20px;text-align:center;">
+ <div style="font-family:'Permanent Marker',cursive;font-size:1.5em;color:var(--accent-success);margin-bottom:10px;">
+ SIMULATION RESULT
+ </div>
+ <div style="font-size:2em;font-weight:900;color:var(--accent-primary);margin-bottom:10px;">
+ ${teams[awayTeam]?.name}: ${awayScore} | ${teams[homeTeam]?.name}: ${homeScore}
+ </div>
+ <div style="font-size:1.2em;color:var(--accent-warning);">
+ Projected Winner: <strong>${winnerName}</strong>
+ </div>
+ </div>
+ `;
+}
+
+async function initializeApp() {
+ try {
+ const [espnGames, oddsGames] = await Promise.all([
+ fetchESPNGames(),
+ fetchLiveOdds()
+ ]);
+ 
+ liveGames = espnGames;
+ liveOdds = oddsGames;
+ 
+ if (espnGames.length > 0) {
+ renderGames(espnGames);
+ } else {
+ const fallbackGames = [
+ { away: 'GB', home: 'DET', date: 'Nov 27', time: '1:00 PM', status: 'Scheduled', awayScore: 0, homeScore: 0 },
+ { away: 'KC', home: 'DAL', date: 'Nov 27', time: '4:30 PM', status: 'Scheduled', awayScore: 0, homeScore: 0 },
+ { away: 'CIN', home: 'BAL', date: 'Nov 27', time: '8:20 PM', status: 'Scheduled', awayScore: 0, homeScore: 0 },
+ { away: 'CHI', home: 'PHI', date: 'Nov 28', time: '3:00 PM', status: 'Scheduled', awayScore: 0, homeScore: 0 },
+ { away: 'JAX', home: 'TEN', date: 'Nov 28', time: '5:30 PM', status: 'Scheduled', awayScore: 0, homeScore: 0 },
+ { away: 'LV', home: 'LAC', date: 'Nov 28', time: '8:15 PM', status: 'Scheduled', awayScore: 0, homeScore: 0 },
+ { away: 'LAR', home: 'CAR', date: 'Nov 30', time: '10:00 AM', status: 'Scheduled', awayScore: 0, homeScore: 0 },
+ { away: 'SF', home: 'CLE', date: 'Nov 30', time: '1:00 PM', status: 'Scheduled', awayScore: 0, homeScore: 0 },
+ { away: 'HOU', home: 'IND', date: 'Nov 30', time: '1:00 PM', status: 'Scheduled', awayScore: 0, homeScore: 0 },
+ { away: 'NO', home: 'MIA', date: 'Nov 30', time: '1:00 PM', status: 'Scheduled', awayScore: 0, homeScore: 0 },
+ { away: 'ATL', home: 'NYJ', date: 'Nov 30', time: '1:00 PM', status: 'Scheduled', awayScore: 0, homeScore: 0 },
+ { away: 'ARI', home: 'TB', date: 'Nov 30', time: '4:05 PM', status: 'Scheduled', awayScore: 0, homeScore: 0 },
+ { away: 'MIN', home: 'SEA', date: 'Nov 30', time: '4:05 PM', status: 'Scheduled', awayScore: 0, homeScore: 0 },
+ { away: 'BUF', home: 'PIT', date: 'Nov 30', time: '4:05 PM', status: 'Scheduled', awayScore: 0, homeScore: 0 },
+ { away: 'NYG', home: 'NE', date: 'Dec 1', time: '8:15 PM', status: 'Scheduled', awayScore: 0, homeScore: 0 }
+ ];
+ renderGames(fallbackGames);
+ }
+ 
+ setInterval(async () => {
+ const [espnGames, oddsGames] = await Promise.all([
+ fetchESPNGames(),
+ fetchLiveOdds()
+ ]);
+ liveGames = espnGames;
+ liveOdds = oddsGames;
+ if (espnGames.length > 0) {
+ renderGames(espnGames);
+ }
+ }, 60000);
+ 
+ } catch (error) {
+ console.error("Error loading data:", error);
+ updateScoresStatus(false);
+ updateOddsStatus(false);
+ }
+}
+
+document.addEventListener("DOMContentLoaded", initializeApp);
+  
+// Tab Switching Function
+function switchTab(event, tabName) {
+  // Hide all tab content
+  document.querySelectorAll('.tab-content').forEach(tab => {
+    tab.classList.remove('active');
+  });
+  // Remove active from all buttons
+  document.querySelectorAll('.tab-button').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  
+  // Show selected tab
+  document.getElementById(tabName + '-tab').classList.add('active');
+  // Highlight selected button
+  event.target.classList.add('active');
+  
+  // If simulator tab, render games with simulation buttons
+  if (tabName === 'simulator') {
+    renderSimulatorGames(liveGames);
+  }
+}
+
+// Render games in simulator with simulation buttons
+function renderSimulatorGames(games) {
+  const container = document.getElementById('simulator-container');
+  if (!container) return;
+  
+  container.innerHTML = '';
+  
+  if (!games || games.length === 0) {
+    container.innerHTML = '<p style="text-align:center;color:var(--text-muted);">No games available for simulation.</p>';
+    return;
+  }
+  
+  games.forEach(game => {
+    const home = teams[game.home];
+    const away = teams[game.away];
+    
+    if (!home || !away) return;
+    
+    const odds = liveOdds.find(o => o.away_team === game.away && o.home_team === game.home);
+    const spread = odds?.bookmakers?.[0]?.markets?.find(m => m.key === 'spreads')
+      ?.outcomes?.find(o => o.name === odds.home_team)?.point || 'N/A';
+    
+    const card = document.createElement('div');
+    card.className = 'matchup-card';
+    card.innerHTML = `
+      <div class="matchup-header">
+        <div>
+          <div class="matchup-day">${game.status || 'Scheduled'}</div>
+          <div class="matchup-date">${game.date || 'TBD'}</div>
+        </div>
+        <div class="matchup-kickoff">${game.time || 'TBD'}</div>
+      </div>
+      <div class="matchup-teams">
+        <div class="team-section">
+          <div class="team-logo">
+            <img src="${away.logo}" alt="${away.name}">
+          </div>
+          <div class="team-name">${away.name}</div>
+        </div>
+        <div class="vs-badge">@</div>
+        <div class="team-section">
+          <div class="team-logo">
+            <img src="${home.logo}" alt="${home.name}">
+          </div>
+          <div class="team-name">${home.name}</div>
+          ${spread !== 'N/A' ? `<div class="spread-badge">Spread: ${spread > 0 ? '+' : ''}${spread}</div>` : ''}
+        </div>
+      </div>
+      <button class="simulate-btn" onclick="runSimulation('${game.away}', '${game.home}')">
+        <i class="fas fa-play"></i> RUN SIMULATION
+      </button>
+      <div id="result-${game.away}-${game.home}" style="margin-top:15px;"></div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+</script>
+
+</body>
+</html>
+
