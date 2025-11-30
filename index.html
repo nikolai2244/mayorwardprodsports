@@ -566,6 +566,7 @@
   <div class="tab-navigation">
   <button class="tab-button active" onclick="switchTab(event, 'matchups')">Live Matchups</button>
   <button class="tab-button" onclick="switchTab(event, 'simulator')">Game Simulator</button>
+      <button class="tab-button" onclick="switchTab(event, 'mayorspicks')">Mayor's Picks</button>
 </div>
 
 <!-- Matchups Tab Content -->
@@ -617,6 +618,38 @@
       <div id="simulator-container" class="matchups-grid"></div>
     </div>
   </div>
+
+     <!-- Mayor's Picks Tab Content -->
+     <div id="mayorspicks-tab" class="tab-content">
+      <div class="card">
+         <div class="card-header">
+            <h2>
+               <div class="logo-badge">
+                  <img src="mayorwardprodsports/MW_LOGOnobackground.png" alt="Logo">
+               </div>
+               The Mayor's Picks
+            </h2>
+         </div>
+         
+         <!-- Top 10 Best Bets -->
+         <div style="margin-bottom: 30px;">
+            <h3 style="font-family: 'Permanent Marker', cursive; color: var(--accent-primary); margin-bottom: 20px;">Top 10 Best Bets</h3>
+            <div id="best-bets-container" class="matchups-grid"></div>
+         </div>
+         
+         <!-- 3-Leg Parlays -->
+         <div style="margin-bottom: 30px;">
+            <h3 style="font-family: 'Permanent Marker', cursive; color: var(--accent-primary); margin-bottom: 20px;">Recommended 3-Leg Parlays</h3>
+            <div id="parlays-container" style="display: grid; gap: 20px;"></div>
+         </div>
+         
+         <!-- Top 2 Upsets -->
+         <div>
+            <h3 style="font-family: 'Permanent Marker', cursive; color: var(--accent-primary); margin-bottom: 20px;">Top 2 Upset Picks</h3>
+            <div id="upsets-container" class="matchups-grid"></div>
+         </div>
+      </div>
+   </div>
   
   
 <script>
