@@ -895,7 +895,7 @@ function runSimulation(awayTeam, homeTeam) {
 
  async function initializeApp() {
  try {
-/const [espnGames, oddsGames] = await Promise.all([
+const [espnGames, oddsGames] = await Promise.all([
  fetchESPNGames(),
  fetchLiveOdds()
  ]);
